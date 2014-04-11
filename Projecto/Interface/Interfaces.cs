@@ -7,6 +7,7 @@ using System.Threading;
 using System.Collections;
 namespace PADIDSTM
 {
+
     public class PadInt : MarshalByRefObject
     {
         private int value;
@@ -44,6 +45,7 @@ namespace PADIDSTM
 
     public interface IMaster
     {
+        public static string baseUrl = "tcp://localhost:";
         Hashtable requestHashTable();
         void addDataServer(int port);
     }

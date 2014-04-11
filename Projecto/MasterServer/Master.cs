@@ -12,7 +12,7 @@ namespace PADIDSTM
 {
     public class Master : MarshalByRefObject, IMaster
     {
-        private Hashtable dataServers = new Hashtable();
+        private ServerHashTable dataServers = new ServerHashTable();
         private int dataServeCounter = 0;
 
         static void Main(string[] args)
@@ -34,15 +34,14 @@ namespace PADIDSTM
             Console.WriteLine("master server launched on port " + port);
         }
 
-        public Hashtable requestHashTable()
+        public ServerHashTable requestHashTable()
         {
             return dataServers;
         }
 
-        public void addDataServer(int port)
+        private void addDataServer(string url)
         {
-            dataServers[dataServeCounter] = port;
-            dataServeCounter++;
+            dataServers.addServer(url);           
         }
 
 

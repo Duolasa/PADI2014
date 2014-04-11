@@ -10,34 +10,52 @@ using System.Collections;
 
 namespace PADIDSTM
 {
-    public class Server : MarshalByRefObject, IData
+    public class DataServer : MarshalByRefObject, IData
     {
 
-        static IMaster masterServer;
-        static private int port;
-        private Hashtable padIntStorage = new Hashtable();
+        IMaster masterServer;
+        private int port;
+        private string url;
+        static int staticPort;
+        static private Hashtable padIntStorage = new Hashtable();
+
+        public
         static void Main(string[] args)
         {
             Console.WriteLine("Data server port?");
-            port = Convert.ToInt32(Console.ReadLine());
-            launchServer(port);
+            staticPort = Convert.ToInt32(Console.ReadLine());
+            launchServerInNewProcess(staticPort);
             getMasterServer();
             registerDataServer();
             Console.ReadLine();
 
         }
 
-        static void launchServer(int port)
+        void launchServer(string url)
         {
             TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, true);
 
             RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(Server),
+                typeof(DataServer),
+                "Server",
+                WellKnownObjectMode.SingleCall);
+
+            Console.WriteLine("data server launched on port " + url);
+
+        }
+
+        static void launchServerInNewProcess(int port)
+        {
+            TcpChannel channel = new TcpChannel(port);
+            ChannelServices.RegisterChannel(channel, true);
+
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                typeof(DataServer),
                 "Server",
                 WellKnownObjectMode.Singleton);
 
-            Console.WriteLine("data server launched on port " + port);
+            Console.WriteLine("data server launched on port " + url);
 
         }
 
