@@ -14,7 +14,7 @@ namespace PADIDSTM
     public class Client
     {
         static IMaster masterServer;
-        static Hashtable dataServersPorts;
+        static ServerHashTable dataServersPorts;
         
         static void Main(string[] args)
         {
@@ -44,9 +44,12 @@ namespace PADIDSTM
 
         static void createPadInt()
         {
+            Random rnd = new Random();
+            int num = rnd.Next(0,666);
+            string url = dataServersPorts.getServerByPadiIntID(num);
             IData dataServer = (IData)Activator.GetObject(
                 typeof(IData),
-                "tcp://localhost:" + dataServersPorts[0] + "/Server");
+                "tcp://localhost:" + url + "/Server");
             PadInt p = dataServer.createPadInt(2);
             p.write(9999);
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
+
 namespace PADIDSTM
 {
 
@@ -45,9 +46,9 @@ namespace PADIDSTM
 
     public interface IMaster
     {
-        public static string baseUrl = "tcp://localhost:";
-        Hashtable requestHashTable();
-        void addDataServer(int port);
+        ServerHashTable requestHashTable();
+        void addDataServer(string url);
+
     }
 
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PADIDSTM
 {
-    class ServerHashTable
+    public class ServerHashTable
     {
         private int numberOfServers = 0;
         private Dictionary<int, string> dataServerUrls;
