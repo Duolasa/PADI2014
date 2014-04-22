@@ -16,20 +16,18 @@ namespace PADIDSTM
         static IMaster masterServer;
         static private int port;
         static private string url;
-        static int staticPort;
         static private Hashtable padIntStorage = new Hashtable();
         static void Main(string[] args)
         {
-            Console.WriteLine("Data server port?");
-            staticPort = Convert.ToInt32(Console.ReadLine());
-            launchServer(staticPort);
+            port = Convert.ToInt32(args[0]);
+            launchServer(port);
             getMasterServer();
             registerDataServer();
             Console.ReadLine();
 
         }
 
-        static void launchServer(int url)
+        static void launchServer(int port)
         {
             TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, true);
@@ -39,7 +37,7 @@ namespace PADIDSTM
                 "Server",
                 WellKnownObjectMode.Singleton);
 
-            Console.WriteLine("data server launched on port " + url);
+            Console.WriteLine("data server launched on port " + port);
 
         }
 
