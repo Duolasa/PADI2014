@@ -13,39 +13,23 @@ namespace PADIDSTM
     public class DataServer : MarshalByRefObject, IData
     {
 
-        IMaster masterServer;
-        private int port;
-        private string url;
+        static IMaster masterServer;
+        static private int port;
+        static private string url;
         static int staticPort;
         static private Hashtable padIntStorage = new Hashtable();
-
-        public
         static void Main(string[] args)
         {
             Console.WriteLine("Data server port?");
             staticPort = Convert.ToInt32(Console.ReadLine());
-            launchServerInNewProcess(staticPort);
+            launchServer(staticPort);
             getMasterServer();
             registerDataServer();
             Console.ReadLine();
 
         }
 
-        void launchServer(string url)
-        {
-            TcpChannel channel = new TcpChannel(port);
-            ChannelServices.RegisterChannel(channel, true);
-
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(DataServer),
-                "Server",
-                WellKnownObjectMode.SingleCall);
-
-            Console.WriteLine("data server launched on port " + url);
-
-        }
-
-        static void launchServerInNewProcess(int port)
+        static void launchServer(int url)
         {
             TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, true);
