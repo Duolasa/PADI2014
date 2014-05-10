@@ -12,6 +12,7 @@ namespace PADIDSTM
 
       static IMaster masterServer;
       static ServerHashTable dataServersPorts;
+      private List<PadInt> updatedPadInts = new List<PadInt>();
 
         public static bool Init()
         {
@@ -20,8 +21,19 @@ namespace PADIDSTM
 
         public bool TxBegin()
         {
-            return true;
+            try
+            {
+                if (dataServersPorts.GetTimeStamp() < masterServer.GetTimeStamp())
+                    RequestHash();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
         }
+
         public bool TxCommit()
         {
             return true;
@@ -47,7 +59,7 @@ namespace PADIDSTM
             return true;
         }
 
-        static void RequestHash()
+        public void RequestHash()
         {
           dataServersPorts = masterServer.requestHashTable();
         }

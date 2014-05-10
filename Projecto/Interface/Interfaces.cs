@@ -48,6 +48,7 @@ namespace PADIDSTM
     {
         ServerHashTable requestHashTable();
         int addDataServer(string url);
+        float GetTimeStamp();
 
     }
 

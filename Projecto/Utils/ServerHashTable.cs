@@ -14,8 +14,6 @@ namespace PADIDSTM
         private Dictionary<int, string> dataServerUrls;
         private long timestamp = DateTime.UtcNow.Ticks;
         private List<int> serversUnderMaintenance = new List<int>();
-        private Object thisLock = new Object();
-
 
         public ServerHashTable()
         {
@@ -25,6 +23,7 @@ namespace PADIDSTM
         public long GetTimeStamp(){
           return timestamp;
         }
+
         public int addServer(string url) {
             dataServerUrls.Add(numberOfServers, url);
             return numberOfServers++;

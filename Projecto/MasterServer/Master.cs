@@ -75,6 +75,11 @@ namespace PADIDSTM
             }
         }
 
+        public long GetTimeStamp()
+        {
+            return dataServers.GetTimeStamp();
+        } 
+
         public ServerHashTable requestHashTable()
         {
             return dataServers;
