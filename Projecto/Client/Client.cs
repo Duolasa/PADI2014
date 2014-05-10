@@ -48,8 +48,7 @@ namespace PADIDSTM
             int num = rnd.Next(0,666);
             string url = dataServersPorts.getServerByPadiIntID(num);
             IData dataServer = (IData)Activator.GetObject(
-                typeof(IData),
-                "tcp://localhost:" + url + "/Server");
+                typeof(IData),url);
             PadInt p = dataServer.createPadInt(2);
             p.write(9999);
 

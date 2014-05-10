@@ -12,19 +12,22 @@ namespace PADIDSTM
     {
         private int numberOfServers = 0;
         private Dictionary<int, string> dataServerUrls;
+        private long timestamp = DateTime.UtcNow.Ticks;
+        private List<int> serversUnderMaintenance = new List<int>();
         private Object thisLock = new Object();
+
 
         public ServerHashTable()
         {
             dataServerUrls = new Dictionary<int, string>();
         }
 
-        public void addServer(string url) {
-            lock (thisLock)
-            {
-                dataServerUrls.Add(numberOfServers, url);
-                numberOfServers++;
-            }
+        public long GetTimeStamp(){
+          return timestamp;
+        }
+        public int addServer(string url) {
+            dataServerUrls.Add(numberOfServers, url);
+            return numberOfServers++;
         }
 
         public string getServerByPadiIntID(int id)
@@ -47,6 +50,16 @@ namespace PADIDSTM
         {
            Dictionary<int, string>.ValueCollection UrlColl = new Dictionary<int,string>( dataServerUrls).Values;
            return UrlColl;
+        }
+
+        public bool IsServerAvailable(int id)
+        {
+          return serversUnderMaintenance.Contains(id);
+        }
+
+        public bool RemoverServerFromMaintenanceList(int id)
+        {
+          return serversUnderMaintenance.Remove(id);
         }
     }
 }

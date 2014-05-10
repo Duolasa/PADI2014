@@ -15,7 +15,7 @@ namespace PADIDSTM
 
         static IMaster masterServer;
         static private int port;
-        static private string url;
+        static private int id;
         private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
         static void Main(string[] args)
@@ -62,8 +62,8 @@ namespace PADIDSTM
         static void registerDataServer()
         {
             Console.WriteLine("Registering on Master");
-            masterServer.addDataServer(Utils.getDataServerUrl(port));
-            Console.WriteLine("Registered on Master Server");
+            id = masterServer.addDataServer(Utils.getDataServerUrl(port));
+            Console.WriteLine("Registered on Master Server with id " + id);
         }
 
         public void receiveDataServersTable(ServerHashTable dataServers)

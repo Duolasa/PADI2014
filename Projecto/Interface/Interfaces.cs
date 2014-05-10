@@ -47,7 +47,7 @@ namespace PADIDSTM
     public interface IMaster
     {
         ServerHashTable requestHashTable();
-        void addDataServer(string url);
+        int addDataServer(string url);
 
     }
 
