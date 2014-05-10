@@ -13,7 +13,7 @@ namespace PADIDSTM
 {
   public class Client
   {
-
+    static void Main(string[] args) { }
 
 
   }

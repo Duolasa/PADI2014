@@ -58,7 +58,7 @@ namespace PADIDSTM
         PadInt AccessPadInt(int uid);
     }
 
-    public interface IApp
+    public interface IPADIDSTM
     {
         bool Init();
         bool TxBegin();

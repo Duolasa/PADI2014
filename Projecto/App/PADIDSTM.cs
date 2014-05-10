@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace PADIDSTM
 {
-  class PADIDSTM
+  class PADIDSTM : IPADIDSTM, IData
     {
 
       static IMaster masterServer;
@@ -52,20 +52,25 @@ namespace PADIDSTM
           dataServersPorts = masterServer.requestHashTable();
         }
 
-        static void CreatePadInt()
+        static PadInt CreatePadInt(int uid)
         {
-          Random rnd = new Random();
-          int num = rnd.Next(0, 666);
-          string url = dataServersPorts.getServerByPadiIntID(num);
+          string url = dataServersPorts.getServerByPadiIntID(uid);
           IData dataServer = (IData)Activator.GetObject(
               typeof(IData), url);
-          PadInt p = dataServer.createPadInt(2);
-          p.write(9999);
-
-          PadInt j = dataServer.acessPadInt(2);
-
-          Console.WriteLine(j.read());
-
+          PadInt p = dataServer.CreatePadInt(uid);
+          return p;
         }
+
+      static PadInt AccessPadInt(int uid){
+        string url = dataServersPorts.getServerByPadiIntID(uid);
+        IData dataServer = (IData)Activator.GetObject(
+                typeof(IData), url);
+
+        PadInt p = dataServer.AccessPadInt(uid);
+        return p;
+
+    }
+
+
     }
 }
