@@ -71,7 +71,7 @@ namespace PADIDSTM
             dataServersTable = dataServers;
         }
 
-        public PadInt createPadInt(int uid)
+        public PadInt CreatePadInt(int uid)
         {
             if( padIntStorage.ContainsKey(uid))
             {
@@ -83,7 +83,7 @@ namespace PADIDSTM
             return pad;
 
         }
-        public PadInt acessPadInt(int uid)
+        public PadInt AccessPadInt(int uid)
         {
             if (!(padIntStorage.ContainsKey(uid)))
             {

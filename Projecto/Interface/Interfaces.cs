@@ -54,20 +54,20 @@ namespace PADIDSTM
 
     public interface IData
     {
-        PadInt createPadInt(int uid);
-        PadInt acessPadInt(int uid);
+        PadInt CreatePadInt(int uid);
+        PadInt AccessPadInt(int uid);
     }
 
     public interface IApp
     {
-        bool init();
-        bool txBegin();
-        bool txCommit();
-        bool txAbort();
-        bool status();
-        bool fail(string url);
-        bool freeze(string url);
-        bool recover(string url);
+        bool Init();
+        bool TxBegin();
+        bool TxCommit();
+        bool TxAbort();
+        bool Status();
+        bool Fail(string url);
+        bool Freeze(string url);
+        bool Recover(string url);
     }
 
 }
