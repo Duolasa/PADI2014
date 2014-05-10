@@ -69,7 +69,6 @@ namespace PADIDSTM
         public void receiveDataServersTable(ServerHashTable dataServers)
         {
             dataServersTable = dataServers;
-            Console.WriteLine("I, port" + port + "got the table" + dataServersTable.ToString());
         }
 
         public PadInt createPadInt(int uid)

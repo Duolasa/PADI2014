@@ -70,7 +70,6 @@ namespace PADIDSTM
                 DataServer dataServer = (DataServer)Activator.GetObject(
                             typeof(DataServer),
                             url);
-                Console.Write(url);
                 if(dataServer != null)
                     dataServer.receiveDataServersTable(dataServers);
             }
@@ -86,9 +85,10 @@ namespace PADIDSTM
           lock (lockDataServers)
           {
             Console.WriteLine("Master Adding data server");
-            return dataServers.addServer(url);
-          }
+            int serverId = dataServers.addServer(url);
             sendTableToDataServers();
+            return serverId;
+          }
         }
 
 
