@@ -15,7 +15,6 @@ namespace PADIDSTM
     {
         private const string dataServerExeLocation = "DataServer";
         private ServerHashTable dataServers = new ServerHashTable();
-        private int dataServeCounter = 0;
         private static List<Process> dataProcesses = new List<Process>();
         private static Process thisProcess;
 
@@ -36,9 +35,8 @@ namespace PADIDSTM
                 }
             };
             Console.ReadLine();
- 
-
         }
+
         static void launchMasterServer(int port)
         {
             TcpChannel channel = new TcpChannel(port);
@@ -61,6 +59,22 @@ namespace PADIDSTM
             }
         }
 
+        public void sendTableToDataServers()
+        {
+            int dataServerCounter = dataServers.getNumberOfServers();
+
+            Dictionary<int, string>.ValueCollection UrlColl = dataServers.getAllUrls();
+            foreach (string url in UrlColl)
+            {
+                DataServer dataServer = (DataServer)Activator.GetObject(
+                            typeof(DataServer),
+                            url);
+                Console.Write(url);
+                if(dataServer != null)
+                    dataServer.receiveDataServersTable(dataServers);
+            }
+        }
+
         public ServerHashTable requestHashTable()
         {
             return dataServers;
@@ -71,7 +85,7 @@ namespace PADIDSTM
             Console.WriteLine("Master Adding data server");
             dataServers.addServer(url);
             Console.WriteLine("Master added data server with sucess!!!!");
-           
+            sendTableToDataServers();
         }
 
 

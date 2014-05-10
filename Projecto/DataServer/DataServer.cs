@@ -16,11 +16,20 @@ namespace PADIDSTM
         static IMaster masterServer;
         static private int port;
         static private string url;
+        private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
         static void Main(string[] args)
         {
-            Console.WriteLine(args);
-            port = Convert.ToInt32(args[0]);
+            //Console.WriteLine(args);
+            if (args.Length > 0)
+            {
+                port = Convert.ToInt32(args[0]);
+            }
+            else 
+            {
+                Console.WriteLine("Port Not Given, write port manually");
+                port = Convert.ToInt32(Console.ReadLine());
+            }
             launchServer(port);
             getMasterServer();
             registerDataServer();
@@ -53,8 +62,14 @@ namespace PADIDSTM
         static void registerDataServer()
         {
             Console.WriteLine("Registering on Master");
-            masterServer.addDataServer(port.ToString());
+            masterServer.addDataServer(Utils.getDataServerUrl(port));
             Console.WriteLine("Registered on Master Server");
+        }
+
+        public void receiveDataServersTable(ServerHashTable dataServers)
+        {
+            dataServersTable = dataServers;
+            Console.WriteLine("I, port" + port + "got the table" + dataServersTable.ToString());
         }
 
         public PadInt createPadInt(int uid)
