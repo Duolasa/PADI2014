@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace PADIDSTM
 {
-  class PADIDSTM : IPADIDSTM, IData
+  class PADIDSTM
     {
 
       static IMaster masterServer;
@@ -19,7 +19,7 @@ namespace PADIDSTM
             return true;
         }
 
-        public bool TxBegin()
+        public static bool TxBegin()
         {
             try
             {
@@ -34,37 +34,37 @@ namespace PADIDSTM
             }
         }
 
-        public bool TxCommit()
+        public static bool TxCommit()
+        { 
+            return true;
+        }
+        public static bool TxAbort()
         {
             return true;
         }
-        public bool TxAbort()
+        public static bool Status()
         {
             return true;
         }
-        public bool Status()
+        public static bool Fail(string url)
         {
             return true;
         }
-        public bool Fail(string url)
+        public static bool Freeze(string url)
         {
             return true;
         }
-        public bool Freeze(string url)
-        {
-            return true;
-        }
-        public bool Recover(string url)
+        public static bool Recover(string url)
         {
             return true;
         }
 
-        public void RequestHash()
+        private static void RequestHash()
         {
           dataServersPorts = masterServer.requestHashTable();
         }
 
-        static PadInt CreatePadInt(int uid)
+        public static PadInt CreatePadInt(int uid)
         {
           string url = dataServersPorts.getServerByPadiIntID(uid);
           IData dataServer = (IData)Activator.GetObject(
@@ -73,7 +73,7 @@ namespace PADIDSTM
           return p;
         }
 
-      static PadInt AccessPadInt(int uid){
+      public static PadInt AccessPadInt(int uid){
         string url = dataServersPorts.getServerByPadiIntID(uid);
         IData dataServer = (IData)Activator.GetObject(
                 typeof(IData), url);
