@@ -9,6 +9,7 @@ namespace PADIDSTM
     public class Utils
     {
         public const string BASE_URL = "tcp://localhost:";
+        public const int TIME_TO_WAIT_FOR_TRANSACTION = 3000;
 
         public static string getDataServerUrl(int port) 
         {

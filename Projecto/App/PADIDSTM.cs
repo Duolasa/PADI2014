@@ -7,70 +7,71 @@ using System.Threading;
 
 namespace PADIDSTM
 {
-  class PADIDSTM : IPADIDSTM, IData
+  class PADIDSTM
+  {
+
+    static IMaster masterServer;
+    static ServerHashTable dataServersPorts;
+
+    public static bool Init()
     {
+      return true;
+    }
 
-      static IMaster masterServer;
-      static ServerHashTable dataServersPorts;
+    public static bool TxBegin()
+    {
+      return true;
+    }
+    public static bool TxCommit()
+    {
+      return true;
+    }
+    public static bool TxAbort()
+    {
+      return true;
+    }
+    public static bool Status()
+    {
+      return true;
+    }
+    public static bool Fail(string url)
+    {
+      return true;
+    }
+    public static bool Freeze(string url)
+    {
+      return true;
+    }
+    public static bool Recover(string url)
+    {
+      return true;
+    }
 
-        public static bool Init()
-        {
-            return true;
-        }
+    private static void RequestHash()
+    {
+      dataServersPorts = masterServer.requestHashTable();
+    }
 
-        public bool TxBegin()
-        {
-            return true;
-        }
-        public bool TxCommit()
-        {
-            return true;
-        }
-        public bool TxAbort()
-        {
-            return true;
-        }
-        public bool Status()
-        {
-            return true;
-        }
-        public bool Fail(string url)
-        {
-            return true;
-        }
-        public bool Freeze(string url)
-        {
-            return true;
-        }
-        public bool Recover(string url)
-        {
-            return true;
-        }
+    public static PadInt CreatePadInt(int uid)
+    {
+      string url = dataServersPorts.getServerByPadiIntID(uid);
+      IData dataServer = (IData)Activator.GetObject(
+          typeof(IData), url);
+      PadInt p = dataServer.CreatePadInt(uid);
+      return p;
+    }
 
-        static void RequestHash()
-        {
-          dataServersPorts = masterServer.requestHashTable();
-        }
-
-        static PadInt CreatePadInt(int uid)
-        {
-          string url = dataServersPorts.getServerByPadiIntID(uid);
-          IData dataServer = (IData)Activator.GetObject(
+    public static PadInt AccessPadInt(int uid)
+    {
+      string url = dataServersPorts.getServerByPadiIntID(uid);
+      IData dataServer = (IData)Activator.GetObject(
               typeof(IData), url);
-          PadInt p = dataServer.CreatePadInt(uid);
-          return p;
-        }
 
-      static PadInt AccessPadInt(int uid){
-        string url = dataServersPorts.getServerByPadiIntID(uid);
-        IData dataServer = (IData)Activator.GetObject(
-                typeof(IData), url);
-
-        PadInt p = dataServer.AccessPadInt(uid);
-        return p;
+      PadInt p = dataServer.AccessPadInt(uid);
+      return p;
 
     }
 
 
-    }
+  }
 }
