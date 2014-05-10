@@ -15,7 +15,7 @@ namespace PADIDSTM
     {
         private const string dataServerExeLocation = "DataServer";
         private ServerHashTable dataServers = new ServerHashTable();
-        private int dataServeCounter = 0;
+        private System.Object lockDataServers = new System.Object();
         private static List<Process> dataProcesses = new List<Process>();
         private static Process thisProcess;
 
@@ -66,11 +66,13 @@ namespace PADIDSTM
             return dataServers;
         }
 
-        public void addDataServer(string url)
+        public int addDataServer(string url)
         {
+          lock (lockDataServers)
+          {
             Console.WriteLine("Master Adding data server");
-            dataServers.addServer(url);
-            Console.WriteLine("Master added data server with sucess!!!!");
+            return dataServers.addServer(url);
+          }
            
         }
 

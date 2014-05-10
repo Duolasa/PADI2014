@@ -15,7 +15,7 @@ namespace PADIDSTM
 
         static IMaster masterServer;
         static private int port;
-        static private string url;
+        static private int id;
         static private Hashtable padIntStorage = new Hashtable();
         static void Main(string[] args)
         {
@@ -53,8 +53,8 @@ namespace PADIDSTM
         static void registerDataServer()
         {
             Console.WriteLine("Registering on Master");
-            masterServer.addDataServer(port.ToString());
-            Console.WriteLine("Registered on Master Server");
+            id =  masterServer.addDataServer(port.ToString());
+            Console.WriteLine("Registered on Master Server with id " + id);
         }
 
         public PadInt createPadInt(int uid)
