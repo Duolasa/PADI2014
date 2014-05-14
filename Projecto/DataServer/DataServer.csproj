@@ -56,6 +56,10 @@
       <Project>{740f69fc-80e2-4c08-88dd-586b14cab2c0}</Project>
       <Name>Interface</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PadiData\PadiData.csproj">
+      <Project>{8f981642-89b1-4d4d-9263-1c4562c31db5}</Project>
+      <Name>PadiData</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{a7dd66e8-9942-491b-85b7-1405a89a0b29}</Project>
       <Name>Utils</Name>

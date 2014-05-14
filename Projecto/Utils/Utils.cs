@@ -10,7 +10,6 @@ namespace PADIDSTM
     {
         public const string BASE_URL = "tcp://localhost:";
         public const int TIME_TO_WAIT_FOR_TRANSACTION = 3000;
-        public const int CLIENT_PORT = 1337;
 
         public static string getDataServerUrl(int port) 
         {

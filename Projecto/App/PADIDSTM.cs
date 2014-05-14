@@ -13,18 +13,15 @@ namespace PADIDSTM {
 
         static IMaster masterServer;
         static ServerHashTable dataServersPorts;
-        static private List<PadInt> updatedPadInts = new List<PadInt>();
+        static private List<PadIntHolder> updatedPadInts = new List<PadIntHolder>();
+        static int currentTXID = 0;
 
 
         public static bool Init() {
-
-          TcpChannel channel = new TcpChannel(Utils.CLIENT_PORT);
+          TcpChannel channel = new TcpChannel();
           ChannelServices.RegisterChannel(channel, true);
             masterServer = (IMaster)Activator.GetObject(typeof(IMaster),"tcp://localhost:1000/MasterServer");
-            Console.WriteLine("Praise the sun");
-
             RequestHash();
-            Console.WriteLine("REQUEST");
             return true;
         }
 
@@ -42,27 +39,36 @@ namespace PADIDSTM {
 
         public static bool TxCommit() {
             try {
-                foreach (PadInt padint in updatedPadInts) {
-                    padint.writeCommit();
+                foreach (PadIntHolder padint in updatedPadInts) {
+                    if (padint.WaitingForWrite)
+                        padint.RealPadInt.writeCommit();
                 }
-                foreach (PadInt padint in updatedPadInts) {
-                    padint.unlockPadInt();
+                foreach (PadIntHolder padint in updatedPadInts) {
+                    RealPadInt realPadInt = padint.RealPadInt;
+                    lock (realPadInt) {
+                        realPadInt.removeMeFromReadersList(currentTXID);
+                        if (padint.WaitingForWrite) 
+                            realPadInt.unlockPadInt();
+                    }
                 }
                 return true;
             } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
+                throw e;
             }
         }
         public static bool TxAbort() {
             try {
-                foreach (PadInt padint in updatedPadInts) {
-                    padint.unlockPadInt();
+                foreach (PadIntHolder padint in updatedPadInts) {
+                    RealPadInt realPadInt = padint.RealPadInt;
+                    lock (realPadInt) {
+                        realPadInt.removeMeFromReadersList(currentTXID);
+                        if (padint.WaitingForWrite)
+                            realPadInt.unlockPadInt();
+                    }
                 }
                 return true;
             } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
+                throw e;
             }
         }
         public static bool Status() {
@@ -72,7 +78,7 @@ namespace PADIDSTM {
                     DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
                     DataServer.State state = dataServer.getStatus();
 
-                    Console.Write("Data Server [" + dataServer.getId() + "] is now" + state.ToString());
+                    Console.WriteLine("Data Server [" + dataServer.getId() + "] is now" + state.ToString());
                 }
                 return true;
             } catch (Exception e) {
@@ -121,17 +127,22 @@ namespace PADIDSTM {
         public static PadInt CreatePadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
             IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-            PadInt p = dataServer.CreatePadInt(uid);
-            if (p != null)
-                updatedPadInts.Add(p);
-            return p;
+            RealPadInt p = dataServer.CreatePadInt(uid);
+            PadIntHolder pHolder = null;
+            if (p != null) {
+                pHolder = new PadIntHolder(currentTXID, p);
+                updatedPadInts.Add(pHolder);
+            }
+
+            return (PadInt) pHolder;
         }
 
         public static PadInt AccessPadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
             IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-            PadInt p = dataServer.AccessPadInt(uid);
-            return p;
+            RealPadInt p = dataServer.AccessPadInt(uid);
+            PadIntHolder pHolder = new PadIntHolder(currentTXID, p);
+            return (PadInt)pHolder;
         }
     }
 }

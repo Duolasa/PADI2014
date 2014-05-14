@@ -20,8 +20,8 @@ namespace PADIDSTM
 
     public interface IData
     {
-        PadInt CreatePadInt(int uid);
-        PadInt AccessPadInt(int uid);
+        RealPadInt CreatePadInt(int uid);
+        RealPadInt AccessPadInt(int uid);
     }
 
   

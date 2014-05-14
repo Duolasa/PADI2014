@@ -74,26 +74,26 @@ namespace PADIDSTM
             dataServersTable = dataServers;
         }
 
-        public PadInt CreatePadInt(int uid)
+        public RealPadInt CreatePadInt(int uid)
         {
             if( padIntStorage.ContainsKey(uid))
             {
                 return null;
             }
 
-            PadInt pad = new PadInt(uid);
+            RealPadInt pad = new RealPadInt(uid);
             padIntStorage.Add(uid, pad);
             return pad;
 
         }
-        public PadInt AccessPadInt(int uid)
+        public RealPadInt AccessPadInt(int uid)
         {
             if (!(padIntStorage.ContainsKey(uid)))
             {
                 return null;
             }
 
-            return (PadInt) padIntStorage[uid];
+            return (RealPadInt)padIntStorage[uid];
 
         }
 
