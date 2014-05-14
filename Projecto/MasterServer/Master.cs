@@ -53,7 +53,7 @@ namespace PADIDSTM
             Console.WriteLine("master server launched on port " + port);
         }
 
-        int getNewTransactionId()
+        public int getNewTransactionId()
         {
           lock (lockTransactionId)
           {

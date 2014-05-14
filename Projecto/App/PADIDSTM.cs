@@ -27,6 +27,7 @@ namespace PADIDSTM {
 
         public static bool TxBegin() {
             updatedPadInts.Clear();
+            currentTXID = masterServer.getNewTransactionId();
             try {
                 if (dataServersPorts.GetTimeStamp() < masterServer.GetTimeStamp())
                     RequestHash();
