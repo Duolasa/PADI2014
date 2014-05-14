@@ -44,13 +44,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PADIDSTM.cs" />
+    <Compile Include="PadiDstm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DataServer\DataServer.csproj">
+      <Project>{ea0b048e-86f4-4417-8172-72c19e531f27}</Project>
+      <Name>DataServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Interface\Interface.csproj">
       <Project>{740f69fc-80e2-4c08-88dd-586b14cab2c0}</Project>
       <Name>Interface</Name>

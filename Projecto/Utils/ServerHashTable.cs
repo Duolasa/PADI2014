@@ -47,7 +47,7 @@ namespace PADIDSTM
 
         public Dictionary<int, string>.ValueCollection getAllUrls()
         {
-           Dictionary<int, string>.ValueCollection UrlColl = new Dictionary<int,string>( dataServerUrls).Values;
+           Dictionary<int, string>.ValueCollection UrlColl = new Dictionary<int,string>(dataServerUrls).Values;
            return UrlColl;
         }
 
@@ -59,6 +59,10 @@ namespace PADIDSTM
         public bool RemoverServerFromMaintenanceList(int id)
         {
           return serversUnderMaintenance.Remove(id);
+        }
+
+        public Dictionary<int, string> getDictionary(){
+            return dataServerUrls;
         }
     }
 }

@@ -52,10 +52,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Client\Client.csproj">
-      <Project>{5d54777f-1e0a-4805-9841-14b0fd75a480}</Project>
-      <Name>Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DataServer\DataServer.csproj">
       <Project>{ea0b048e-86f4-4417-8172-72c19e531f27}</Project>
       <Name>DataServer</Name>

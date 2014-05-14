@@ -18,6 +18,9 @@ namespace PADIDSTM
         static private int id;
         private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
+        public enum State { Working, Failed, Frozen };
+        private State state = State.Working;
+
         static void Main(string[] args)
         {
             //Console.WriteLine(args);
@@ -94,6 +97,16 @@ namespace PADIDSTM
 
         }
 
-       
+        public State getStatus() {
+            return state;
+        }
+
+        public void setStatus(State state) {
+             this.state = state;
+        }
+
+        public int getId() {
+            return id;
+        }       
     }
 }

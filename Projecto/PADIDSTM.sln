@@ -1,16 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PadiDstm", "App\PadiDstm.csproj", "{41783C50-C192-41C8-84D7-726378EF02CD}"
 	ProjectSection(ProjectDependencies) = postProject
+		{EA0B048E-86F4-4417-8172-72C19E531F27} = {EA0B048E-86F4-4417-8172-72C19E531F27}
 		{A7DD66E8-9942-491B-85B7-1405A89A0B29} = {A7DD66E8-9942-491B-85B7-1405A89A0B29}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{5D54777F-1E0A-4805-9841-14B0FD75A480}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A7DD66E8-9942-491B-85B7-1405A89A0B29} = {A7DD66E8-9942-491B-85B7-1405A89A0B29}
+		{41783C50-C192-41C8-84D7-726378EF02CD} = {41783C50-C192-41C8-84D7-726378EF02CD}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataServer", "DataServer\DataServer.csproj", "{EA0B048E-86F4-4417-8172-72C19E531F27}"

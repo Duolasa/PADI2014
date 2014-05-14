@@ -28,7 +28,7 @@ namespace PADIDSTM
       lockPadInt();
     }
 
-    public void write(int val)
+    public void Write(int val)
     {
       try
       {
@@ -49,7 +49,7 @@ namespace PADIDSTM
       this.waitingForWrite = false;
     }
 
-    public int read()
+    public int Read()
     {
       try
       {
