@@ -13,6 +13,8 @@ namespace PADIDSTM
     {
         ServerHashTable requestHashTable();
         int addDataServer(string url);
+
+        int getNewTransactionId();
         long GetTimeStamp();
 
     }
