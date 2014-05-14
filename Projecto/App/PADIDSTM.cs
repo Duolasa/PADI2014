@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 
 namespace PADIDSTM {
     public class PadiDstm {
@@ -14,8 +17,12 @@ namespace PADIDSTM {
 
 
         public static bool Init() {
+
+          TcpChannel channel = new TcpChannel(Utils.CLIENT_PORT);
+          ChannelServices.RegisterChannel(channel, true);
             masterServer = (IMaster)Activator.GetObject(typeof(IMaster),"tcp://localhost:1000/MasterServer");
-            Console.WriteLine("GET MASTER");
+            Console.WriteLine("Praise the sun");
+
             RequestHash();
             Console.WriteLine("REQUEST");
             return true;

@@ -82,7 +82,10 @@ namespace PADIDSTM
 
         public ServerHashTable requestHashTable()
         {
+          Console.WriteLine("Praise the sun");
+
             return dataServers;
+
         }
 
         public int addDataServer(string url)
