@@ -15,9 +15,11 @@ namespace PADIDSTM
     {
         private const string dataServerExeLocation = "DataServer";
         private ServerHashTable dataServers = new ServerHashTable();
-        private System.Object lockDataServers = new System.Object();
+        private System.Object lockDataServers = new System.Object();   
+        private System.Object lockTransactionId= new System.Object();
         private static List<Process> dataProcesses = new List<Process>();
         private static Process thisProcess;
+        private static int transactionsId = 0;
 
         static void Main(string[] args)
         {
@@ -51,6 +53,14 @@ namespace PADIDSTM
             Console.WriteLine("master server launched on port " + port);
         }
 
+        int getNewTransactionId()
+        {
+          lock (lockTransactionId)
+          {
+            return transactionsId++;
+          }
+        } 
+
         static void launchDataServers(int nrOfServers)
         {
             int port = 1001;
@@ -82,10 +92,7 @@ namespace PADIDSTM
 
         public ServerHashTable requestHashTable()
         {
-          Console.WriteLine("Praise the sun");
-
             return dataServers;
-
         }
 
         public int addDataServer(string url)
