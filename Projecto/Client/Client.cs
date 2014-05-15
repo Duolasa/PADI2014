@@ -33,16 +33,30 @@ namespace PADIDSTM {
                 Console.WriteLine("ACCESS 0");
                 pi_b = PadiDstm.AccessPadInt(1);
                 pi_a.Write(36);
+                Console.ReadLine();
+                Console.WriteLine("a = " + pi_a.Read());
                 Console.WriteLine("WRITE");
                 pi_b.Write(37);
                 Console.WriteLine("WRITE");
                 Console.WriteLine("a = " + pi_a.Read());
                 Console.WriteLine("b = " + pi_b.Read());
                 PadiDstm.Status();
-                // The following 3 lines assume we have 2 servers: one at port 2001 and another at port 2002
-                res = PadiDstm.Freeze("tcp://localhost:1001/Server");
-                res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                Console.WriteLine("Testing recover server 1");
                 res = PadiDstm.Fail("tcp://localhost:1002/Server");
+                PadiDstm.Status();
+                res = PadiDstm.Recover("tcp://localhost:1002/Server");
+                PadiDstm.Status();
+
+                Console.WriteLine("Testing recover server 0");
+                res = PadiDstm.Fail("tcp://localhost:1001/Server");
+                PadiDstm.Status();
+                res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                PadiDstm.Status();
+
+                Console.WriteLine("Testing recover server 1");
+                res = PadiDstm.Fail("tcp://localhost:1002/Server");
+                PadiDstm.Status();
+                res = PadiDstm.Recover("tcp://localhost:1002/Server");
                 PadiDstm.Status();
                 res = PadiDstm.TxCommit();
             } catch (Exception e) {

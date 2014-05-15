@@ -95,12 +95,12 @@ namespace PADIDSTM
             return dataServers;
         }
 
-        public int addDataServer(string url)
+        public int addDataServer(int port)
         {
           lock (lockDataServers)
           {
             Console.WriteLine("Master Adding data server");
-            int serverId = dataServers.addServer(url);
+            int serverId = dataServers.addServer(port);
             sendTableToDataServers();
             return serverId;
           }

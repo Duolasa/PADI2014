@@ -7,6 +7,8 @@ using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Net;
+using System.Net.Sockets;
 
 namespace PADIDSTM {
     public class PadiDstm {
@@ -91,7 +93,7 @@ namespace PADIDSTM {
         public static bool Fail(string url) {
             try {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
-                dataServer.setStatus(DataServer.State.Failed);
+                dataServer.fail();
                 return true;
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -101,7 +103,7 @@ namespace PADIDSTM {
         public static bool Freeze(string url) {
             try {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
-                dataServer.setStatus(DataServer.State.Frozen);
+                dataServer.freeze();
                 return true;
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -110,7 +112,7 @@ namespace PADIDSTM {
         }
 
 
-        public static bool Recover(string url) {
+        /*public static bool Recover(string url) {
             try {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
                 dataServer.setStatus(DataServer.State.Working);
@@ -119,6 +121,14 @@ namespace PADIDSTM {
                 Console.WriteLine(e.Message);
                 return false;
             }
+        }*/
+
+        public static bool Recover(string url) {
+            Int32 port = dataServersPorts.getAdminPortByUrl(url);
+            TcpClient client = new TcpClient(Dns.GetHostEntry("localhost").AddressList[0].ToString(), port);
+            client.Close();
+            Console.WriteLine("connect to port");
+            return true;
         }
 
         private static void RequestHash() {
@@ -143,6 +153,7 @@ namespace PADIDSTM {
             IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
             RealPadInt p = dataServer.AccessPadInt(uid);
             PadIntHolder pHolder = new PadIntHolder(currentTXID, p);
+            updatedPadInts.Add(pHolder);
             return (PadInt)pHolder;
         }
     }

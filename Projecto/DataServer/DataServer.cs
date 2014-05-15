@@ -6,44 +6,52 @@ using System.Threading.Tasks;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Threading;
 using System.Collections;
+using System.Net;
+using System.Net.Sockets;
 
-namespace PADIDSTM
-{
-    public class DataServer : MarshalByRefObject, IData
-    {
-
+namespace PADIDSTM {
+    public class DataServer : MarshalByRefObject, IData {
+        static WaitingForRecover worker;
+        static TcpChannel remoteChannel;
+        static TcpChannel adminChannel;
         static IMaster masterServer;
         static private int port;
+        static private int adminPort;
         static private int id;
         private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
+        static private object statusChangeLock = new object();
         public enum State { Working, Failed, Frozen };
-        private State state = State.Working;
+        static private State state = State.Working;
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             //Console.WriteLine(args);
-            if (args.Length > 0)
-            {
+            if (args.Length > 0) {
                 port = Convert.ToInt32(args[0]);
-            }
-            else 
-            {
+            } else {
                 Console.WriteLine("Port Not Given, write port manually");
                 port = Convert.ToInt32(Console.ReadLine());
             }
             launchServer(port);
+            adminPort = port + Utils.ADMIN_PORT;
             getMasterServer();
             registerDataServer();
+            launchRecoverCommandThread();
             Console.ReadLine();
 
         }
 
-        static void launchServer(int port)
-        {
-            TcpChannel channel = new TcpChannel(port);
-            ChannelServices.RegisterChannel(channel, true);
+        static void launchRecoverCommandThread() {
+            worker = new WaitingForRecover();
+            Thread workerThread = new Thread(worker.waitForRecover);
+            workerThread.Start();
+        }
+        static void launchServer(int port) {
+            remoteChannel = new TcpChannel(port);
+            adminChannel = new TcpChannel(port + Utils.ADMIN_PORT);
+            ChannelServices.RegisterChannel(remoteChannel, true);
 
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(DataServer),
@@ -54,30 +62,25 @@ namespace PADIDSTM
 
         }
 
-        static void getMasterServer()
-        {
+        static void getMasterServer() {
             masterServer = (IMaster)Activator.GetObject(
                 typeof(IMaster),
                 "tcp://localhost:1000/MasterServer");
             Console.WriteLine("got Master Server");
         }
 
-        static void registerDataServer()
-        {
-            Console.WriteLine("Registering on Master");
-            id = masterServer.addDataServer(Utils.getDataServerUrl(port));
+        static void registerDataServer() {
+            Console.WriteLine("Registering on Master with port: " + port);
+            id = masterServer.addDataServer(port);
             Console.WriteLine("Registered on Master Server with id " + id);
         }
 
-        public void receiveDataServersTable(ServerHashTable dataServers)
-        {
+        public void receiveDataServersTable(ServerHashTable dataServers) {
             dataServersTable = dataServers;
         }
 
-        public RealPadInt CreatePadInt(int uid)
-        {
-            if( padIntStorage.ContainsKey(uid))
-            {
+        public RealPadInt CreatePadInt(int uid) {
+            if (padIntStorage.ContainsKey(uid)) {
                 return null;
             }
 
@@ -86,10 +89,8 @@ namespace PADIDSTM
             return pad;
 
         }
-        public RealPadInt AccessPadInt(int uid)
-        {
-            if (!(padIntStorage.ContainsKey(uid)))
-            {
+        public RealPadInt AccessPadInt(int uid) {
+            if (!(padIntStorage.ContainsKey(uid))) {
                 return null;
             }
 
@@ -98,15 +99,62 @@ namespace PADIDSTM
         }
 
         public State getStatus() {
-            return state;
+            lock (statusChangeLock) {
+                return state;
+            }
         }
 
-        public void setStatus(State state) {
-             this.state = state;
+        static private void setStatus(State newState) {
+            lock (statusChangeLock) {
+                state = newState;
+            }
         }
 
         public int getId() {
             return id;
-        }       
+        }
+
+        public void fail() {
+            setStatus(State.Failed);
+            ChannelServices.UnregisterChannel(remoteChannel);
+        }
+
+        public void freeze() {
+            setStatus(State.Frozen);
+            ChannelServices.UnregisterChannel(remoteChannel);
+        }
+
+        static void recover() {
+            ChannelServices.RegisterChannel(remoteChannel, true);
+            setStatus(State.Working);
+        }
+
+        private class WaitingForRecover {
+            public void waitForRecover() {
+                TcpListener server = null;
+                // Set the TcpListener on port 13000.
+                IPAddress localAddr = Dns.GetHostEntry("localhost").AddressList[0];
+                // TcpListener server = new TcpListener(port);
+                server = new TcpListener(localAddr, adminPort);
+
+                // Start listening for client requests.
+                server.Start();
+
+
+                // Enter the listening loop. 
+                while (true) {
+                    Console.WriteLine("Waiting for a recover... ");
+
+                    // Perform a blocking call to accept requests. 
+                    // You could also user server.AcceptSocket() here.
+                    TcpClient client = server.AcceptTcpClient();
+                    client.Close();
+                    Console.WriteLine("Going To Recover!");
+                    if(state == State.Failed)
+                        recover();
+
+                }
+            }
+        }
     }
 }

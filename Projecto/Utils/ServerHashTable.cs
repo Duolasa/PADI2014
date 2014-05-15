@@ -12,21 +12,30 @@ namespace PADIDSTM
     {
         private int numberOfServers = 0;
         private Dictionary<int, string> dataServerUrls;
+        private Dictionary<string, int> remoteUrlToAdminPort;
         private long timestamp = DateTime.UtcNow.Ticks;
         private List<int> serversUnderMaintenance = new List<int>();
 
         public ServerHashTable()
         {
             dataServerUrls = new Dictionary<int, string>();
+            remoteUrlToAdminPort = new Dictionary<string, int>();
         }
 
         public long GetTimeStamp(){
           return timestamp;
         }
 
-        public int addServer(string url) {
-            dataServerUrls.Add(numberOfServers, url);
+        public int addServer(int port) {
+            string remoteUrl = Utils.getDataServerUrl(port);
+            dataServerUrls.Add(numberOfServers, remoteUrl);
+            remoteUrlToAdminPort.Add(remoteUrl, port + Utils.ADMIN_PORT);
+
             return numberOfServers++;
+        }
+
+        public int getAdminPortByUrl(string url) {
+            return remoteUrlToAdminPort[url];
         }
 
         public string getServerByPadiIntID(int id)

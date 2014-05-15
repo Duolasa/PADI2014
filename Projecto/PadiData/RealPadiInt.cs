@@ -74,7 +74,9 @@ namespace PADIDSTM
     }
 
     public void removeMeFromReadersList(int txID) {
-        readingTXID.Remove(txID);
+        lock (this) {
+            readingTXID.Remove(txID);
+        }
     }
 
       //never called
@@ -85,7 +87,10 @@ namespace PADIDSTM
 
     public void unlockPadInt()
     {
-        Monitor.PulseAll(this);
+        lock (this) {
+            beingWrited = false;
+            Monitor.PulseAll(this);
+        }
     }
 
   }

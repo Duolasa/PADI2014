@@ -12,7 +12,7 @@ namespace PADIDSTM
     public interface IMaster
     {
         ServerHashTable requestHashTable();
-        int addDataServer(string url);
+        int addDataServer(int port);
 
         int getNewTransactionId();
         long GetTimeStamp();
