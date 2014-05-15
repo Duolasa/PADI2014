@@ -24,6 +24,11 @@ namespace PADIDSTM
       value = 0;
     }
 
+    public int ID
+    {
+      get { return id; }
+    }
+
     public void Write(int val, int txID)
     {
       try
@@ -50,9 +55,10 @@ namespace PADIDSTM
 
     }
 
-    public void writeCommit()
+    public int writeCommit()
     {
       this.value = this.newValue;
+      return this.value;
     }
 
     public int Read(int txID) {
@@ -91,6 +97,11 @@ namespace PADIDSTM
             beingWrited = false;
             Monitor.PulseAll(this);
         }
+    }
+
+    public void DirectWrite(int v)
+    {
+      value = v;
     }
 
   }

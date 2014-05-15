@@ -16,6 +16,8 @@ namespace PADIDSTM {
         static IMaster masterServer;
         static ServerHashTable dataServersPorts;
         static private List<PadIntHolder> updatedPadInts = new List<PadIntHolder>();
+        static private List<int> createdPadInts = new List<int>();
+
         static int currentTXID = 0;
 
 
@@ -29,6 +31,7 @@ namespace PADIDSTM {
 
         public static bool TxBegin() {
             updatedPadInts.Clear();
+            createdPadInts.Clear();
             currentTXID = masterServer.getNewTransactionId();
             try {
                 if (dataServersPorts.GetTimeStamp() < masterServer.GetTimeStamp())
@@ -43,8 +46,14 @@ namespace PADIDSTM {
         public static bool TxCommit() {
             try {
                 foreach (PadIntHolder padint in updatedPadInts) {
-                    if (padint.WaitingForWrite)
-                        padint.RealPadInt.writeCommit();
+                  if (padint.WaitingForWrite)
+                  {
+                    int value = padint.RealPadInt.writeCommit();
+                    string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
+                    IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
+                    RealPadInt safecopy = dataServer.AccessPadIntSafeCopy(padint.RealPadInt.ID);
+                    safecopy.DirectWrite(value);
+                  }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {
                     RealPadInt realPadInt = padint.RealPadInt;
@@ -68,6 +77,15 @@ namespace PADIDSTM {
                         if (padint.WaitingForWrite)
                             realPadInt.unlockPadInt();
                     }
+                }
+
+                foreach (int i in createdPadInts)
+                {
+                  string url = dataServersPorts.getServerByPadiIntID(i);
+                  IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
+                  dataServer.DeletePadInt(i);
+                  dataServer.DeletePadIntSafeCopy(i);
+
                 }
                 return true;
             } catch (Exception e) {
@@ -141,6 +159,8 @@ namespace PADIDSTM {
             RealPadInt p = dataServer.CreatePadInt(uid);
             PadIntHolder pHolder = null;
             if (p != null) {
+                createdPadInts.Add(uid);
+                dataServer.CreatePadIntSafeCopy(uid);
                 pHolder = new PadIntHolder(currentTXID, p);
                 updatedPadInts.Add(pHolder);
             }

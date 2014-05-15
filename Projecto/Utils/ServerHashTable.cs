@@ -30,7 +30,6 @@ namespace PADIDSTM
             string remoteUrl = Utils.getDataServerUrl(port);
             dataServerUrls.Add(numberOfServers, remoteUrl);
             remoteUrlToAdminPort.Add(remoteUrl, port + Utils.ADMIN_PORT);
-
             return numberOfServers++;
         }
 

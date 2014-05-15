@@ -29,6 +29,7 @@ namespace PADIDSTM
             launchMasterServer(1000);
             launchDataServers(nrOfDataServers);
             while (nrOfDataServers != dataServers.getNumberOfServers()) { }
+            sendTableToDataServers();
             initiateDataServersCopy(); 
             thisProcess = Process.GetCurrentProcess();
             thisProcess.EnableRaisingEvents = true;
@@ -73,7 +74,7 @@ namespace PADIDSTM
             }
         }
 
-        public void sendTableToDataServers()
+        static public void sendTableToDataServers()
         {
             int dataServerCounter = dataServers.getNumberOfServers();
 

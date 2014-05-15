@@ -57,7 +57,6 @@ namespace PADIDSTM {
           return pisc;
         }
 
-
         public void getRefToMySafeCopy()
         {
           Dictionary<int, string> dic = dataServersTable.getDictionary();
@@ -106,6 +105,24 @@ namespace PADIDSTM {
             dataServersTable = dataServers;
         }
 
+        public RealPadInt CreatePadIntSafeCopy(int uid)
+        {
+            RealPadInt pad = new RealPadInt(uid);
+            myPadIntSafeCopy.PadIntStorage.Add(uid, pad);
+            return pad;
+        }
+
+        public RealPadInt AccessPadIntSafeCopy(int uid)
+        {
+          return (RealPadInt) myPadIntSafeCopy.PadIntStorage[uid];
+        }
+
+        public void DeletePadIntSafeCopy(int uid)
+        {
+          myPadIntSafeCopy.PadIntStorage.Remove(uid);
+
+        }
+
         public RealPadInt CreatePadInt(int uid) {
             if (padIntStorage.ContainsKey(uid)) {
                 return null;
@@ -124,6 +141,12 @@ namespace PADIDSTM {
             return (RealPadInt)padIntStorage[uid];
 
         }
+
+        public void DeletePadInt(int uid)
+        {
+          padIntStorage.Remove(uid);
+        }
+
 
         public State getStatus() {
             lock (statusChangeLock) {
