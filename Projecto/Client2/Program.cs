@@ -22,9 +22,9 @@ namespace PADIDSTM {
 
                 res = PadiDstm.TxBegin();
                 Console.WriteLine("BEGIN");
-                PadInt pi_a = PadiDstm.AccessPadInt(0);
+                PadInt pi_a = PadiDstm.CreatePadInt(0);
                 Console.WriteLine("ACCESS 0");
-                PadInt pi_b = PadiDstm.AccessPadInt(1);
+                PadInt pi_b = PadiDstm.CreatePadInt(1);
                 Console.WriteLine("ACCESS 1");
               //  pi_a.Write(36);
                 Console.ReadLine();
@@ -36,9 +36,9 @@ namespace PADIDSTM {
                 Console.WriteLine("b = " + pi_b.Read());
                 PadiDstm.Status();
                 // The following 3 lines assume we have 2 servers: one at port 2001 and another at port 2002
-                res = PadiDstm.Freeze("tcp://localhost:1001/Server");
-                res = PadiDstm.Recover("tcp://localhost:1001/Server");
-                res = PadiDstm.Fail("tcp://localhost:1002/Server");
+                //res = PadiDstm.Freeze("tcp://localhost:1001/Server");
+                //res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                //res = PadiDstm.Fail("tcp://localhost:1002/Server");
                 PadiDstm.Status();
                 res = PadiDstm.TxCommit();
             } catch (Exception e) {

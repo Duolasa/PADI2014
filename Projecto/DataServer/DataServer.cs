@@ -22,12 +22,12 @@ namespace PADIDSTM {
         static private int adminPort;
         static private int id;
         static private ServerHashTable dataServersTable = new ServerHashTable();
-        static private Hashtable padIntStorage = new Hashtable();
+        static private Dictionary<int,Hashtable> padIntStorage = new Dictionary<int, Hashtable>();
         static private object statusChangeLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
-        static private PadIntSafeCopy myPadIntSafeCopy;
-        static private Dictionary<int, PadIntSafeCopy> otherSafeCopies = new Dictionary<int,PadIntSafeCopy>();
+        static private Dictionary<int, Hashtable> myPadIntSafeCopy = new Dictionary<int, Hashtable>();
+        static private Dictionary<int, Dictionary<int, Hashtable>> otherSafeCopies = new Dictionary<int, Dictionary<int, Hashtable>>();
 
         static void Main(string[] args) {
             //Console.WriteLine(args);
@@ -82,6 +82,7 @@ namespace PADIDSTM {
         static void registerDataServer() {
             Console.WriteLine("Registering on Master with port: " + port);
             id = masterServer.addDataServer(port);
+            padIntStorage.Add(id, new Hashtable());
             Console.WriteLine("Registered on Master Server with id " + id);
         }
 
@@ -89,15 +90,29 @@ namespace PADIDSTM {
             dataServersTable = dataServers;
         }
 
-        public PadIntSafeCopy getPadIntSafeCopy(int serverId)
+        public bool ServerHasDied(int id)
         {
-          PadIntSafeCopy pisc;
+          if (otherSafeCopies.ContainsKey(id))
+          {
+            Dictionary<int, Hashtable> safeCopy;
+            otherSafeCopies.TryGetValue(id, out safeCopy);
+
+
+          }
+
+          return false;
+        } 
+      
+        public Dictionary<int, Hashtable> getPadIntSafeCopy(int serverId)
+        {
+          Dictionary<int, Hashtable> pisc;
           if (otherSafeCopies.ContainsKey(serverId))
           {
             otherSafeCopies.TryGetValue(serverId, out pisc);
             return pisc;
           }
-          pisc = new PadIntSafeCopy(serverId);
+          pisc = new Dictionary<int, Hashtable>();
+          pisc.Add(serverId, new Hashtable());
           otherSafeCopies.Add(serverId, pisc);
           return pisc;
         }
@@ -106,7 +121,8 @@ namespace PADIDSTM {
         {
           Dictionary<int, string> dic = dataServersTable.getDictionary();
           String url;
-          dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
+          int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
+          dic.TryGetValue(backupServerId, out url);
 
           DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
           myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
@@ -116,44 +132,80 @@ namespace PADIDSTM {
 
         public RealPadInt CreatePadIntSafeCopy(int uid)
         {
+            int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
             RealPadInt pad = new RealPadInt(uid);
-            myPadIntSafeCopy.PadIntStorage.Add(uid, pad);
+            Hashtable safeCopy;
+            myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
+            safeCopy.Add(uid, pad);
             return pad;
         }
 
         public RealPadInt AccessPadIntSafeCopy(int uid)
         {
-          return (RealPadInt) myPadIntSafeCopy.PadIntStorage[uid];
+          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+          Hashtable safeCopy;
+          myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
+          return (RealPadInt) safeCopy[uid];
         }
 
         public void DeletePadIntSafeCopy(int uid)
         {
-          myPadIntSafeCopy.PadIntStorage.Remove(uid);
+          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+          Hashtable safeCopy;
+          myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
+          safeCopy.Remove(uid);
 
         }
 
         public RealPadInt CreatePadInt(int uid) {
-            if (padIntStorage.ContainsKey(uid)) {
+            int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+
+          if (!padIntStorage.ContainsKey(correspondingServer)) {
+                return null;
+            }
+            Hashtable safeCopy;
+            padIntStorage.TryGetValue(correspondingServer, out safeCopy);
+
+            if (safeCopy.ContainsKey(uid)) {
                 return null;
             }
 
             RealPadInt pad = new RealPadInt(uid);
-            padIntStorage.Add(uid, pad);
+            safeCopy.Add(uid, pad);
             return pad;
 
         }
         public RealPadInt AccessPadInt(int uid) {
-            if (!(padIntStorage.ContainsKey(uid))) {
-                return null;
-            }
+          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
-            return (RealPadInt)padIntStorage[uid];
+          if (!padIntStorage.ContainsKey(correspondingServer))
+          {
+            return null;
+          }
+
+          Hashtable safeCopy;
+          padIntStorage.TryGetValue(correspondingServer, out safeCopy);
+
+          if (!safeCopy.ContainsKey(uid))
+          {
+            return null;
+          }
+
+          return (RealPadInt)safeCopy[uid];
 
         }
 
         public void DeletePadInt(int uid)
         {
-          padIntStorage.Remove(uid);
+          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+
+          if (!padIntStorage.ContainsKey(correspondingServer))
+          {
+          }
+
+          Hashtable safeCopy;
+          padIntStorage.TryGetValue(correspondingServer, out safeCopy);
+          safeCopy.Remove(uid);
         }
 
 
