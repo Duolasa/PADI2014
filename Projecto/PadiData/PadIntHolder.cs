@@ -28,7 +28,7 @@ namespace PADIDSTM {
             try {
                 return realPadInt.Read(txID);
             } catch (Exception e) {
-                throw e;
+                throw new TxException("Read", e);
             }
 
 
@@ -39,7 +39,7 @@ namespace PADIDSTM {
                 realPadInt.Write(value, txID);
                 waitingForWrite = true;
             } catch (Exception e) {
-                throw e;
+                throw new TxException("Write", e);
             }
         }
     }

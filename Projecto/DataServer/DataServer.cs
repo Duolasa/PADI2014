@@ -219,6 +219,10 @@ namespace PADIDSTM {
             {
               while (true)
               {
+                  if (state == State.Failed) {
+                      Thread.Sleep(1000);
+                      continue;
+                  }
                 Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
                 masterServer.iAmAlive(id);
               }

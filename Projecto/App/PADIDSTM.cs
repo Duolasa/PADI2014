@@ -38,8 +38,7 @@ namespace PADIDSTM {
                     RequestHash();
                 return true;
             } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
+                throw new TxException("TxBegin", e);
             }
         }
 
@@ -65,7 +64,7 @@ namespace PADIDSTM {
                 }
                 return true;
             } catch (Exception e) {
-                throw e;
+                throw new TxException("TxCommit", e);
             }
         }
         public static bool TxAbort() {
@@ -89,11 +88,10 @@ namespace PADIDSTM {
                 }
                 return true;
             } catch (Exception e) {
-                throw e;
+                throw new TxException("TxAbort", e);
             }
         }
         public static bool Status() {
-            try {
                 Dictionary<int, string>.ValueCollection UrlCollection = dataServersPorts.getAllUrls();
                 foreach (string url in UrlCollection) {
                     DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
@@ -102,31 +100,18 @@ namespace PADIDSTM {
                     Console.WriteLine("Data Server [" + dataServer.getId() + "] is now" + state.ToString());
                 }
                 return true;
-            } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
-            }
         }
 
         public static bool Fail(string url) {
-            try {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
                 dataServer.fail();
                 return true;
-            } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
-            }
         }
+
         public static bool Freeze(string url) {
-            try {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
                 dataServer.freeze();
                 return true;
-            } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
-            }
         }
 
 
@@ -155,7 +140,9 @@ namespace PADIDSTM {
 
         public static PadInt CreatePadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
-            IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
+            DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
+            if (dataServer.getStatus() == DataServer.State.Failed)
+                return null;
             RealPadInt p = dataServer.CreatePadInt(uid);
             PadIntHolder pHolder = null;
             if (p != null) {
@@ -170,7 +157,9 @@ namespace PADIDSTM {
 
         public static PadInt AccessPadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
-            IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
+            DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
+            if (dataServer.getStatus() == DataServer.State.Failed)
+                return null;
             RealPadInt p = dataServer.AccessPadInt(uid);
             PadIntHolder pHolder = new PadIntHolder(currentTXID, p);
             updatedPadInts.Add(pHolder);
