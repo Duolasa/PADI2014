@@ -31,18 +31,19 @@ namespace PADIDSTM {
                 Console.WriteLine("Testing recover server 1");
                 res = PadiDstm.Fail("tcp://localhost:1001/Server");
                 PadiDstm.Status();
-                pi_a = PadiDstm.AccessPadInt(0);
+                pi_a = PadiDstm.AccessPadInt(1);
                 Console.WriteLine("a = " + pi_a.Read());
 
-                PadInt pi_d = PadiDstm.CreatePadInt(3);
-                pi_d.Write(55);
-                Console.WriteLine("d = " + pi_d.Read());
+                //PadInt pi_d = PadiDstm.CreatePadInt(3);
+                //pi_d.Write(55);
+                //Console.WriteLine("d = " + pi_d.Read());
 
-                PadInt pi_c = PadiDstm.CreatePadInt(2);
-                pi_c.Write(50);
-                Console.WriteLine("c = " + pi_c.Read());
+                //PadInt pi_c = PadiDstm.CreatePadInt(2);
+                //pi_c.Write(50);
+                //Console.WriteLine("c = " + pi_c.Read());
 
 
+                Console.ReadLine();
                 res = PadiDstm.TxCommit();
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
