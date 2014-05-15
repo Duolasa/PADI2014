@@ -20,11 +20,13 @@ namespace PADIDSTM {
         static private int port;
         static private int adminPort;
         static private int id;
-        private ServerHashTable dataServersTable = new ServerHashTable();
+        static private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
         static private object statusChangeLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
+        static private PadIntSafeCopy myPadIntSafeCopy;
+        static private Dictionary<int, PadIntSafeCopy> otherSafeCopies = new Dictionary<int,PadIntSafeCopy>();
 
         static void Main(string[] args) {
             //Console.WriteLine(args);
@@ -38,9 +40,34 @@ namespace PADIDSTM {
             adminPort = port + Utils.ADMIN_PORT;
             getMasterServer();
             registerDataServer();
-            launchRecoverCommandThread();
             Console.ReadLine();
 
+        }
+
+        public PadIntSafeCopy getPadIntSafeCopy(int serverId)
+        {
+          PadIntSafeCopy pisc;
+          if (otherSafeCopies.ContainsKey(serverId))
+          {
+            otherSafeCopies.TryGetValue(serverId, out pisc);
+            return pisc;
+          }
+          pisc = new PadIntSafeCopy(serverId);
+          otherSafeCopies.Add(serverId, pisc);
+          return pisc;
+        }
+
+
+        public void getRefToMySafeCopy()
+        {
+          Dictionary<int, string> dic = dataServersTable.getDictionary();
+          String url;
+          dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
+
+          DataServer copyHolder = (DataServer) Activator.GetObject(typeof(DataServer),url); ;
+          myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+
+          Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
         static void launchRecoverCommandThread() {

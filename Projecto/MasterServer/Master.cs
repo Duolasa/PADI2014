@@ -14,19 +14,22 @@ namespace PADIDSTM
     public class Master : MarshalByRefObject, IMaster
     {
         private const string dataServerExeLocation = "DataServer";
-        private ServerHashTable dataServers = new ServerHashTable();
+        private static ServerHashTable dataServers = new ServerHashTable();
         private System.Object lockDataServers = new System.Object();   
         private System.Object lockTransactionId= new System.Object();
         private static List<Process> dataProcesses = new List<Process>();
         private static Process thisProcess;
         private static int transactionsId = 0;
+        private static int nrOfDataServers = 0;
 
         static void Main(string[] args)
         {
             Console.WriteLine("How many DataServers do you want?");
-            int nrOfDataServerToLaunch = Convert.ToInt32(Console.ReadLine());
+            nrOfDataServers = Convert.ToInt32(Console.ReadLine());
             launchMasterServer(1000);
-            launchDataServers(nrOfDataServerToLaunch);
+            launchDataServers(nrOfDataServers);
+            while (nrOfDataServers != dataServers.getNumberOfServers()) { }
+            initiateDataServersCopy(); 
             thisProcess = Process.GetCurrentProcess();
             thisProcess.EnableRaisingEvents = true;
             thisProcess.Exited += (sender, e) =>
@@ -83,6 +86,22 @@ namespace PADIDSTM
                 if(dataServer != null)
                     dataServer.receiveDataServersTable(dataServers);
             }
+        }
+
+        static void initiateDataServersCopy()
+        {
+          Console.WriteLine("Data servers getting reference to safe copy");
+          int dataServerCounter = dataServers.getNumberOfServers();
+
+          Dictionary<int, string>.ValueCollection UrlColl = dataServers.getAllUrls();
+          foreach (string url in UrlColl)
+          {
+            DataServer dataServer = (DataServer)Activator.GetObject(
+                        typeof(DataServer),
+                        url);
+            if (dataServer != null)
+              dataServer.getRefToMySafeCopy();
+          }
         }
 
         public long GetTimeStamp()
