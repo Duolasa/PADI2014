@@ -7,6 +7,7 @@ using System.Collections;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Threading;
 using System.Diagnostics;
 
 namespace PADIDSTM
@@ -14,6 +15,7 @@ namespace PADIDSTM
     public class Master : MarshalByRefObject, IMaster
     {
         private const string dataServerExeLocation = "DataServer";
+        private static Thread heartBeatWorkerThread;
         private static ServerHashTable dataServers = new ServerHashTable();
         private System.Object lockDataServers = new System.Object();   
         private System.Object lockTransactionId= new System.Object();
@@ -30,7 +32,8 @@ namespace PADIDSTM
             launchDataServers(nrOfDataServers);
             while (nrOfDataServers != dataServers.getNumberOfServers()) { }
             sendTableToDataServers();
-            initiateDataServersCopy(); 
+            initiateDataServersCopy();
+            launchHeartBeatWorker();
             thisProcess = Process.GetCurrentProcess();
             thisProcess.EnableRaisingEvents = true;
             thisProcess.Exited += (sender, e) =>
@@ -57,13 +60,25 @@ namespace PADIDSTM
             Console.WriteLine("master server launched on port " + port);
         }
 
+        static void launchHeartBeatWorker()
+        {
+          MasterServerWorker heartBeatWorker = new MasterServerWorker();
+          heartBeatWorkerThread = new Thread(heartBeatWorker.checkServersAliveWorker);
+          heartBeatWorkerThread.Start();
+        }
+
         public int getNewTransactionId()
         {
           lock (lockTransactionId)
           {
             return transactionsId++;
           }
-        } 
+        }
+
+        public void iAmAlive(int uid)
+        {
+          dataServers.serverIsAlive(uid);
+        }
 
         static void launchDataServers(int nrOfServers)
         {
@@ -123,6 +138,30 @@ namespace PADIDSTM
             int serverId = dataServers.addServer(port);
             sendTableToDataServers();
             return serverId;
+          }
+        }
+
+        private class MasterServerWorker
+        {
+          public void checkServersAliveWorker() {
+            while (true)
+            {
+              Thread.Sleep(Utils.HEARTBEAT_INTERVAL_CHECK);
+              Console.WriteLine("=======================================");
+              Dictionary<int, string> deadServers = dataServers.getDeadServers();
+              if (deadServers.Count > 0)
+              {
+                foreach(KeyValuePair<int,string> pair in deadServers) {
+                  Console.WriteLine("OMFG MAN(SERVER) " + pair.Key + " IS DOWN");
+                }
+                
+              }
+              else
+              {
+                Console.WriteLine("Everyone is alive..boring...");
+              }
+              Console.WriteLine("=======================================");
+            }
           }
         }
 

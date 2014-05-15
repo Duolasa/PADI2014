@@ -17,6 +17,8 @@ namespace PADIDSTM
         int getNewTransactionId();
         long GetTimeStamp();
 
+        void iAmAlive(int uid);
+
     }
 
 
@@ -29,6 +31,8 @@ namespace PADIDSTM
         RealPadInt CreatePadIntSafeCopy(int uid);
         RealPadInt AccessPadIntSafeCopy(int uid);
         void DeletePadIntSafeCopy(int uid);
+
+
 
 
     }

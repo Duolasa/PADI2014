@@ -13,7 +13,8 @@ using System.Net.Sockets;
 
 namespace PADIDSTM {
     public class DataServer : MarshalByRefObject, IData {
-        static WaitingForRecover worker;
+      static DataServerWorker worker;
+      static DataServerWorker heartBeatWorker;
         static TcpChannel remoteChannel;
         static TcpChannel adminChannel;
         static IMaster masterServer;
@@ -40,37 +41,20 @@ namespace PADIDSTM {
             adminPort = port + Utils.ADMIN_PORT;
             getMasterServer();
             registerDataServer();
+            launchHeartBeatThread();
             Console.ReadLine();
 
         }
 
-        public PadIntSafeCopy getPadIntSafeCopy(int serverId)
+
+        static void launchHeartBeatThread()
         {
-          PadIntSafeCopy pisc;
-          if (otherSafeCopies.ContainsKey(serverId))
-          {
-            otherSafeCopies.TryGetValue(serverId, out pisc);
-            return pisc;
-          }
-          pisc = new PadIntSafeCopy(serverId);
-          otherSafeCopies.Add(serverId, pisc);
-          return pisc;
+          heartBeatWorker = new DataServerWorker();
+          Thread heartBeatWorkerThread = new Thread(heartBeatWorker.heartBeatWorker);
+          heartBeatWorkerThread.Start();
         }
-
-        public void getRefToMySafeCopy()
-        {
-          Dictionary<int, string> dic = dataServersTable.getDictionary();
-          String url;
-          dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
-
-          DataServer copyHolder = (DataServer) Activator.GetObject(typeof(DataServer),url); ;
-          myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
-
-          Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
-        }
-
         static void launchRecoverCommandThread() {
-            worker = new WaitingForRecover();
+          worker = new DataServerWorker();
             Thread workerThread = new Thread(worker.waitForRecover);
             workerThread.Start();
         }
@@ -103,6 +87,31 @@ namespace PADIDSTM {
 
         public void receiveDataServersTable(ServerHashTable dataServers) {
             dataServersTable = dataServers;
+        }
+
+        public PadIntSafeCopy getPadIntSafeCopy(int serverId)
+        {
+          PadIntSafeCopy pisc;
+          if (otherSafeCopies.ContainsKey(serverId))
+          {
+            otherSafeCopies.TryGetValue(serverId, out pisc);
+            return pisc;
+          }
+          pisc = new PadIntSafeCopy(serverId);
+          otherSafeCopies.Add(serverId, pisc);
+          return pisc;
+        }
+
+        public void getRefToMySafeCopy()
+        {
+          Dictionary<int, string> dic = dataServersTable.getDictionary();
+          String url;
+          dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
+
+          DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+          myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+
+          Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
         public RealPadInt CreatePadIntSafeCopy(int uid)
@@ -179,7 +188,7 @@ namespace PADIDSTM {
             setStatus(State.Working);
         }
 
-        private class WaitingForRecover {
+        private class DataServerWorker {
             public void waitForRecover() {
                 TcpListener server = null;
                 // Set the TcpListener on port 13000.
@@ -204,6 +213,15 @@ namespace PADIDSTM {
                         recover();
 
                 }
+            }
+
+            public void heartBeatWorker()
+            {
+              while (true)
+              {
+                Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
+                masterServer.iAmAlive(id);
+              }
             }
         }
     }
