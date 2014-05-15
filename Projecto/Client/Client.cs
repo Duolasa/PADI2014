@@ -17,47 +17,32 @@ namespace PADIDSTM {
             try {
                 Console.ReadLine();
                 PadiDstm.Init();
-                Console.WriteLine("INIT");
 
                 res = PadiDstm.TxBegin();
-                Console.WriteLine("BEGIN");
                 PadInt pi_a = PadiDstm.CreatePadInt(0);
-                Console.WriteLine("CREATE 0");
+                pi_a.Write(36);
                 PadInt pi_b = PadiDstm.CreatePadInt(1);
+                pi_b.Write(37);
                 res = PadiDstm.TxCommit();
-                Console.WriteLine("COMMIT");
 
                 res = PadiDstm.TxBegin();
-                Console.WriteLine("BEGIN");
-                pi_a = PadiDstm.AccessPadInt(0);
-                Console.WriteLine("ACCESS 0");
-                pi_b = PadiDstm.AccessPadInt(1);
-                pi_a.Write(36);
-                Console.ReadLine();
-                Console.WriteLine("a = " + pi_a.Read());
-                Console.WriteLine("WRITE");
-                pi_b.Write(37);
-                Console.WriteLine("WRITE");
-                Console.WriteLine("a = " + pi_a.Read());
-                Console.WriteLine("b = " + pi_b.Read());
-          /*      PadiDstm.Status();
-                Console.WriteLine("Testing recover server 1");
-                res = PadiDstm.Fail("tcp://localhost:1002/Server");
-                PadiDstm.Status();
-                res = PadiDstm.Recover("tcp://localhost:1002/Server");
-                PadiDstm.Status();
 
-                Console.WriteLine("Testing recover server 0");
+                PadiDstm.Status();
+                Console.WriteLine("Testing recover server 1");
                 res = PadiDstm.Fail("tcp://localhost:1001/Server");
                 PadiDstm.Status();
-                res = PadiDstm.Recover("tcp://localhost:1001/Server");
-                PadiDstm.Status();
+                pi_a = PadiDstm.AccessPadInt(0);
+                Console.WriteLine("a = " + pi_a.Read());
 
-                Console.WriteLine("Testing recover server 1");
-                res = PadiDstm.Fail("tcp://localhost:1002/Server");
-                PadiDstm.Status();
-                res = PadiDstm.Recover("tcp://localhost:1002/Server");
-                PadiDstm.Status();*/
+                PadInt pi_d = PadiDstm.CreatePadInt(3);
+                pi_d.Write(55);
+                Console.WriteLine("d = " + pi_d.Read());
+
+                PadInt pi_c = PadiDstm.CreatePadInt(2);
+                pi_c.Write(50);
+                Console.WriteLine("c = " + pi_c.Read());
+
+
                 res = PadiDstm.TxCommit();
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
