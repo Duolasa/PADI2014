@@ -13,6 +13,7 @@ namespace PADIDSTM
         private int numberOfServers = 0;
         private Dictionary<int, string> dataServerUrls;
         private Dictionary<string, int> remoteUrlToAdminPort;
+        private Dictionary<int, bool> serverAliveList;
         private long timestamp = DateTime.UtcNow.Ticks;
         private List<int> serversUnderMaintenance = new List<int>();
 
@@ -20,6 +21,7 @@ namespace PADIDSTM
         {
             dataServerUrls = new Dictionary<int, string>();
             remoteUrlToAdminPort = new Dictionary<string, int>();
+            serverAliveList = new Dictionary<int, bool>();
         }
 
         public long GetTimeStamp(){
@@ -30,6 +32,7 @@ namespace PADIDSTM
             string remoteUrl = Utils.getDataServerUrl(port);
             dataServerUrls.Add(numberOfServers, remoteUrl);
             remoteUrlToAdminPort.Add(remoteUrl, port + Utils.ADMIN_PORT);
+            serverAliveList.Add(numberOfServers, true);
             return numberOfServers++;
         }
 
@@ -67,6 +70,27 @@ namespace PADIDSTM
         public bool RemoverServerFromMaintenanceList(int id)
         {
           return serversUnderMaintenance.Remove(id);
+        }
+
+        public void serverIsAlive(int uid)
+        {
+          serverAliveList[uid] = true;
+        }
+
+        public  Dictionary<int, string> getDeadServers()
+        {
+          Dictionary<int, string> deadServers = new Dictionary<int, string>();
+          Dictionary<int, bool> serverListCopy = new Dictionary<int, bool>(serverAliveList);
+          foreach (KeyValuePair<int, bool> pair in serverListCopy)
+          {
+            if(!pair.Value) {
+              deadServers.Add(pair.Key, dataServerUrls[pair.Key]);
+            }
+            serverAliveList[pair.Key] = false;
+       
+          }
+
+          return deadServers;
         }
 
         public Dictionary<int, string> getDictionary(){
