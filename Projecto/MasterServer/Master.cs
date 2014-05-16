@@ -142,8 +142,7 @@ namespace PADIDSTM {
                             Console.WriteLine("Server " + pair.Key + " died for the first time");
 
                             dataServers.getAlreadyDiedBefore().Add(pair.Key, true);
-                            dataServers.getDictionary()[pair.Key] = dataServers.getDictionary()[(pair.Key + 1) % dataServers.getNumberOfServers()];
-                            sendTableToDataServers();
+                            dataServers.updateTable(pair.Value, dataServers.getDictionary()[(pair.Key + 1) % dataServers.getNumberOfServers()]);sendTableToDataServers();
                             BroadCastDeathOfServer(pair.Key);
                           }
                             Console.WriteLine("OMFG MAN(SERVER) " + pair.Key + " IS DOWN");
@@ -161,3 +160,5 @@ namespace PADIDSTM {
 
     }
 }
+
+

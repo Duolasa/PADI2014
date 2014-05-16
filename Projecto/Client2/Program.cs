@@ -17,18 +17,8 @@ namespace PADIDSTM {
             try {
                 Console.ReadLine();
                 PadiDstm.Init();
-                res = PadiDstm.TxBegin();
-                Console.WriteLine("Trying to access Padint 0");
-                PadInt pi_a = PadiDstm.AccessPadInt(0);
-                Console.WriteLine("Going to read");
-                Console.WriteLine("a = " + pi_a.Read());
 
-                Console.ReadLine();
-
-                pi_a = PadiDstm.AccessPadInt(0);
-                    Console.WriteLine("a = " + pi_a.Read());
-
-                //res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                res = PadiDstm.Recover("tcp://localhost:1001/Server");
                 /*res = PadiDstm.TxBegin();
                 Console.WriteLine("BEGIN");
                 PadInt pi_a = PadiDstm.CreatePadInt(0);

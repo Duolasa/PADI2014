@@ -14,7 +14,9 @@ namespace PADIDSTM
         private Dictionary<int, string> dataServerUrls;
         private Dictionary<string, int> remoteUrlToAdminPort;
         private Dictionary<int, bool> serverAliveList;
+        private List<int> stilAlive;
         private Dictionary<int, bool> serverAlreadyDied = new Dictionary<int, bool>();
+
         private long timestamp = DateTime.UtcNow.Ticks;
         private List<int> serversUnderMaintenance = new List<int>();
 
@@ -24,6 +26,18 @@ namespace PADIDSTM
             remoteUrlToAdminPort = new Dictionary<string, int>();
             serverAliveList = new Dictionary<int, bool>();
         }
+
+        public void updateTable(string oldUrl, string newUrl) {
+            List<int> changedUrl = new List<int>();
+            foreach(KeyValuePair<int, string> entry in dataServerUrls) {
+                if (entry.Value == oldUrl) {
+                    changedUrl.Add(entry.Key);
+                }
+            }
+            foreach (int key in changedUrl) {
+                dataServerUrls[key] = newUrl;
+            }
+    }
 
         public long GetTimeStamp(){
           return timestamp;

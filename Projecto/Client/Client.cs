@@ -19,28 +19,31 @@ namespace PADIDSTM {
                 PadiDstm.Init();
                 res = PadiDstm.TxBegin();
                 PadInt pi_a = PadiDstm.CreatePadInt(0);
-                Console.WriteLine("Created Paint 0");
                 pi_a.Write(36);
-                Console.WriteLine("Wrote Padint 0");
                 Console.ReadLine();
-                PadiDstm.TxAbort();
-                Console.WriteLine("Aborted");
-                //res = PadiDstm.TxCommit();
+                res = PadiDstm.TxCommit();
+
+                res = PadiDstm.Fail("tcp://localhost:1001/Server");
+
+                Console.WriteLine("Next TX...");
                 Console.ReadLine();
                 res = PadiDstm.TxBegin();
-                PadiDstm.Status();
-                Console.WriteLine("Testing recover server 1");
-               // res = PadiDstm.Fail("tcp://localhost:1001/Server");
-                PadiDstm.Status();
-                Console.ReadLine();
-                pi_a = PadiDstm.AccessPadInt(0);
-                if (pi_a == null)
-                    Console.WriteLine("NULL");
-                Console.WriteLine("a = " + pi_a.Read());
-                Console.ReadLine();
-                res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                PadiDstm.Status();;
                 pi_a = PadiDstm.AccessPadInt(0);
                 Console.WriteLine("a = " + pi_a.Read());
+                Console.ReadLine();
+                res = PadiDstm.TxCommit();
+
+                res = PadiDstm.Fail("tcp://localhost:1002/Server");
+
+                Console.WriteLine("Next TX...");
+                Console.ReadLine();
+                res = PadiDstm.TxBegin();
+                PadiDstm.Status(); ;
+                pi_a = PadiDstm.AccessPadInt(0);
+                Console.WriteLine("a = " + pi_a.Read());
+                Console.ReadLine();
+                res = PadiDstm.TxCommit();
 
                 //PadInt pi_d = PadiDstm.CreatePadInt(3);
                 //pi_d.Write(55);

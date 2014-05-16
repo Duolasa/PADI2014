@@ -34,7 +34,7 @@ namespace PADIDSTM {
             createdPadInts.Clear();
             currentTXID = masterServer.getNewTransactionId();
             try {
-                if (dataServersPorts.GetTimeStamp() < masterServer.GetTimeStamp())
+                
                     RequestHash();
                 return true;
             } catch (Exception e) {
@@ -49,8 +49,9 @@ namespace PADIDSTM {
                   {
                     string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
                     IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-                    dataServer.WriteCommit(padint.RealPadInt.ID, padint.RealPadInt.DirectRead());
                     padint.RealPadInt.writeCommit();
+                    dataServer.WriteCommit(padint.RealPadInt.ID, padint.RealPadInt.DirectRead());
+
                   }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {
@@ -153,9 +154,7 @@ namespace PADIDSTM {
             string url = dataServersPorts.getServerByPadiIntID(uid);
             DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
             if (dataServer.getStatus() == DataServer.State.Failed) {
-                RequestHash();
-                url = dataServersPorts.getServerByPadiIntID(uid);
-                dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
+                return null;
             }
             RealPadInt p = dataServer.CreatePadInt(uid);
             PadIntHolder pHolder = null;
@@ -175,9 +174,7 @@ namespace PADIDSTM {
             string url = dataServersPorts.getServerByPadiIntID(uid);
             DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
             if (dataServer.getStatus() == DataServer.State.Failed) {
-                RequestHash();
-                url = dataServersPorts.getServerByPadiIntID(uid);
-                dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
+                return null;
             }
             RealPadInt p = dataServer.AccessPadInt(uid);
             PadIntHolder pHolder = new PadIntHolder(currentTXID, p);

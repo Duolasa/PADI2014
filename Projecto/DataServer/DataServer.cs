@@ -112,7 +112,7 @@ namespace PADIDSTM {
                 Hashtable myPadIntStorage;
                 padIntStorage.TryGetValue(entry.Key, out myPadIntStorage);
 
-                Console.WriteLine(other[0].ToString());
+                
                 foreach (DictionaryEntry pad in other)
                 {
                   Console.WriteLine("adding padint " + pad.Key + " to padintstorage");
@@ -142,9 +142,10 @@ namespace PADIDSTM {
               foreach (KeyValuePair<int, Hashtable> entry in padIntStorage)
               {
                 Hashtable myHash = entry.Value;
-                foreach (KeyValuePair<int, RealPadInt> pad in myHash)
+                foreach (DictionaryEntry pad in myHash)
                 {
-                  CreateOnMySafeCopy(pad.Key, pad.Value.ID, pad.Value.DirectRead());
+                    RealPadInt padint = (RealPadInt)pad.Value;
+                    CreateOnMySafeCopy((int)pad.Key, padint.ID, padint.DirectRead());
                 }
               }
 
