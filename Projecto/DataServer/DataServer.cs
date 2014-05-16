@@ -175,7 +175,7 @@ namespace PADIDSTM {
             copyHolder.WriteOnOthersSafeCopy(id, correspondingId, padInt);
         }
 
-        public void DeleteOnMySafeCopy(int correspondingId, RealPadInt padInt)
+        public void DeleteOnMySafeCopy(int correspondingId, int padIntId)
         {
           Dictionary<int, string> dic = dataServersTable.getDictionary();
           String url;
@@ -184,7 +184,7 @@ namespace PADIDSTM {
 
           DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url);
 
-          copyHolder.DeleteOnOthersSafeCopy(id, correspondingId, padInt);
+          copyHolder.DeleteOnOthersSafeCopy(id, correspondingId, padIntId);
         }
 
         public void CreateOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
@@ -222,7 +222,7 @@ namespace PADIDSTM {
           }
         }
 
-        public void DeleteOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
+        public void DeleteOnOthersSafeCopy(int ownerId, int correspondingId, int padIntId)
         {
           if (otherSafeCopies.ContainsKey(ownerId))
           {
@@ -232,7 +232,7 @@ namespace PADIDSTM {
             {
               Hashtable safeCopy;
               safeCopyDict.TryGetValue(correspondingId, out safeCopy);
-              safeCopy.Remove(padInt.ID);
+              safeCopy.Remove(padIntId);
             }
           }
 
@@ -269,10 +269,19 @@ namespace PADIDSTM {
           WriteOnMySafeCopy(correspondingServer, p);
         }
 
-        public void DeletePadIntSafeCopy(RealPadInt p)
+        public void DeletePadIntSafeCopy(int padIntId)
         {
-          int correspondingServer = p.ID % dataServersTable.getNumberOfServers();
-          DeleteOnMySafeCopy(correspondingServer, p);
+          int correspondingServer = padIntId % dataServersTable.getNumberOfServers();
+          DeleteOnMySafeCopy(correspondingServer, padIntId);
+        }
+
+        public void WriteCommit(RealPadInt padInt)
+        {
+          checkFreezeStatus();
+          padInt.writeCommit();
+          int correspondingServer = padInt.ID % dataServersTable.getNumberOfServers();
+          WriteOnMySafeCopy(correspondingServer, padInt);
+          
         }
 
         public void checkFreezeStatus() {
@@ -308,7 +317,7 @@ namespace PADIDSTM {
 
         }
         public RealPadInt AccessPadInt(int uid) {
-checkFreezeStatus();
+          checkFreezeStatus();
           int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
           if (!padIntStorage.ContainsKey(correspondingServer))
