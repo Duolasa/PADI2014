@@ -90,17 +90,51 @@ namespace PADIDSTM {
             dataServersTable = dataServers;
         }
 
-        public bool ServerHasDied(int id)
+        public bool ServerHasDied(int serverId)
         {
-          if (otherSafeCopies.ContainsKey(id))
+          Console.WriteLine("boas");
+
+          if (otherSafeCopies.ContainsKey(serverId))   /// if this server is responsible for the save copy of the dead
           {
+            Console.WriteLine("i am server " + id + " and i have stuff from server " + serverId);
             Dictionary<int, Hashtable> safeCopy;
-            otherSafeCopies.TryGetValue(id, out safeCopy);
+            otherSafeCopies.TryGetValue(serverId, out safeCopy);
 
+            foreach (KeyValuePair<int, Hashtable> entry in safeCopy)
+            {
+              Hashtable clone = (Hashtable) entry.Value.Clone();
+              padIntStorage.Add(entry.Key, clone);
+              myPadIntSafeCopy.Add(entry.Key, (Hashtable) clone.Clone());
+            }
+            otherSafeCopies.Remove(serverId);
 
+            return true;
+          }
+
+          if (serverId == (id + 1) % dataServersTable.getNumberOfServers()) //dead server had my backup copy
+          {
+            Console.WriteLine("server " + serverId + " had my stuff. I am " + id);
+
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            int backupServerId = (id + 2) % dataServersTable.getNumberOfServers();
+            dic.TryGetValue(backupServerId, out url);
+
+            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+            myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+            myPadIntSafeCopy.Remove(id);
+
+            foreach (KeyValuePair<int, Hashtable> entry in padIntStorage)
+            {
+              Hashtable clone = (Hashtable)entry.Value.Clone();
+              myPadIntSafeCopy.Add(entry.Key, clone);
+            }
+
+            return true;
           }
 
           return false;
+
         } 
       
         public Dictionary<int, Hashtable> getPadIntSafeCopy(int serverId)

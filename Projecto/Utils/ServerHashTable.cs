@@ -14,6 +14,7 @@ namespace PADIDSTM
         private Dictionary<int, string> dataServerUrls;
         private Dictionary<string, int> remoteUrlToAdminPort;
         private Dictionary<int, bool> serverAliveList;
+        private Dictionary<int, bool> serverAlreadyDied = new Dictionary<int, bool>();
         private long timestamp = DateTime.UtcNow.Ticks;
         private List<int> serversUnderMaintenance = new List<int>();
 
@@ -96,5 +97,10 @@ namespace PADIDSTM
         public Dictionary<int, string> getDictionary(){
             return dataServerUrls;
         }
+
+      public Dictionary<int, bool> getAlreadyDiedBefore(){
+        return serverAlreadyDied;
+      }
+
     }
 }
