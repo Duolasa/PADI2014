@@ -144,8 +144,11 @@ namespace PADIDSTM {
         public static PadInt CreatePadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
             DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
-            if (dataServer.getStatus() == DataServer.State.Failed)
-                return null;
+            if (dataServer.getStatus() == DataServer.State.Failed) {
+                RequestHash();
+                url = dataServersPorts.getServerByPadiIntID(uid);
+                dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
+            }
             RealPadInt p = dataServer.CreatePadInt(uid);
             PadIntHolder pHolder = null;
             if (p != null) {
@@ -160,12 +163,10 @@ namespace PADIDSTM {
 
         public static PadInt AccessPadInt(int uid) {
             string url = dataServersPorts.getServerByPadiIntID(uid);
-            Console.WriteLine("pre url: " + url);
             DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
             if (dataServer.getStatus() == DataServer.State.Failed) {
                 RequestHash();
                 url = dataServersPorts.getServerByPadiIntID(uid);
-                Console.WriteLine("pos url: " + url);
                 dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
             }
             RealPadInt p = dataServer.AccessPadInt(uid);

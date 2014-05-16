@@ -22,11 +22,15 @@ namespace PADIDSTM {
                 res = PadiDstm.TxBegin();
                 Console.WriteLine("Begi");
                 PadInt pi_a = PadiDstm.CreatePadInt(0);
+                Console.WriteLine("CREATE");
                 pi_a.Write(36);
+                Console.WriteLine("WRITE");
                 PadInt pi_b = PadiDstm.CreatePadInt(1);
+                Console.WriteLine("CREATE");
                 pi_b.Write(37);
+                Console.WriteLine("WRITE");
                 Console.WriteLine("Going to freeze");
-                res = PadiDstm.Freeze("tcp://localhost:1001/Server");
+             //   res = PadiDstm.Freeze("tcp://localhost:1001/Server");
                 Console.WriteLine("Freeze");
                 res = PadiDstm.TxCommit();
 
