@@ -63,7 +63,7 @@ namespace PADIDSTM {
         static void launchServer(int port) {
             remoteChannel = new TcpChannel(port);
             adminChannel = new TcpChannel(port + Utils.ADMIN_PORT);
-            ChannelServices.RegisterChannel(remoteChannel, true);
+            ChannelServices.RegisterChannel(remoteChannel, false);
 
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(DataServer),
@@ -210,9 +210,8 @@ namespace PADIDSTM {
         }
 
 
-        public  void WriteCommit(RealPadInt padInt) {
+        public  void WriteCommit() {
             checkFreezeStatus();
-            padInt.writeCommit();
         }
 
         public RealPadInt CreatePadInt(int uid) {

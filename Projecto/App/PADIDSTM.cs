@@ -23,7 +23,7 @@ namespace PADIDSTM {
 
         public static bool Init() {
           TcpChannel channel = new TcpChannel();
-          ChannelServices.RegisterChannel(channel, true);
+          ChannelServices.RegisterChannel(channel, false);
             masterServer = (IMaster)Activator.GetObject(typeof(IMaster),"tcp://localhost:1000/MasterServer");
             RequestHash();
             return true;
@@ -49,7 +49,10 @@ namespace PADIDSTM {
                   {
                     string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
                     IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-                    dataServer.WriteCommit(padint.RealPadInt);
+                    Console.WriteLine("before commit");
+                    dataServer.WriteCommit();
+                    padint.RealPadInt.writeCommit();
+                    Console.WriteLine("after commit");
                   }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {
@@ -62,7 +65,8 @@ namespace PADIDSTM {
                 }
                 return true;
             } catch (Exception e) {
-                throw new TxException("TxCommit", e);
+                Console.WriteLine(e.Message);
+                throw new Exception("Fodasse") ;
             }
         }
         public static bool TxAbort() {
