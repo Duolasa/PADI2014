@@ -47,11 +47,9 @@ namespace PADIDSTM {
                 foreach (PadIntHolder padint in updatedPadInts) {
                   if (padint.WaitingForWrite)
                   {
-                    int value = padint.RealPadInt.writeCommit();
                     string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
                     IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-                    RealPadInt safecopy = dataServer.AccessPadIntSafeCopy(padint.RealPadInt.ID);
-                    safecopy.DirectWrite(value);
+                    dataServer.WriteCommit(padint.RealPadInt);
                   }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {
