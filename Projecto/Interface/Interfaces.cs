@@ -28,9 +28,9 @@ namespace PADIDSTM
         RealPadInt AccessPadInt(int uid);
         void DeletePadInt(int uid);
 
-        RealPadInt CreatePadIntSafeCopy(int uid);
-        RealPadInt AccessPadIntSafeCopy(int uid);
-        void DeletePadIntSafeCopy(int uid);
+        void CreatePadIntSafeCopy(RealPadInt p);
+        void WritePadIntSafeCopy(RealPadInt p);
+        void DeletePadIntSafeCopy(RealPadInt p);
 
 
 

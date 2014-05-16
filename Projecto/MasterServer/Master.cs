@@ -107,7 +107,7 @@ namespace PADIDSTM {
                             typeof(DataServer),
                             url);
                 if (dataServer != null)
-                    dataServer.getRefToMySafeCopy();
+                  dataServer.CreateMySafeCopy();
             }
         }
 
