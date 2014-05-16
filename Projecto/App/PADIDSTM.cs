@@ -150,7 +150,7 @@ namespace PADIDSTM {
             PadIntHolder pHolder = null;
             if (p != null) {
                 createdPadInts.Add(uid);
-                dataServer.CreatePadIntSafeCopy(uid);
+                dataServer.CreateOnMySafeCopy(dataServer.getId(),p);
                 pHolder = new PadIntHolder(currentTXID, p);
                 updatedPadInts.Add(pHolder);
             }

@@ -27,7 +27,6 @@ namespace PADIDSTM {
         static private object requestQueueLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
-        static private Dictionary<int, Hashtable> myPadIntSafeCopy = new Dictionary<int, Hashtable>();
         static private Dictionary<int, Dictionary<int, Hashtable>> otherSafeCopies = new Dictionary<int, Dictionary<int, Hashtable>>();
         static private List<Object> requestQueue = new List<Object>();
 
@@ -96,104 +95,193 @@ namespace PADIDSTM {
         {
           if (otherSafeCopies.ContainsKey(serverId))   /// if this server is responsible for the save copy of the dead
           {
-            Console.WriteLine("i am server " + id + " and i had a safe cpy from server " + serverId);
+            Console.WriteLine("i am server " + id + " and I had the safe copy of " + serverId);
             Dictionary<int, Hashtable> safeCopy;
             otherSafeCopies.TryGetValue(serverId, out safeCopy);
 
             foreach (KeyValuePair<int, Hashtable> entry in safeCopy)
             {
-              padIntStorage.Add(entry.Key, entry.Value);
-              myPadIntSafeCopy.Add(entry.Key, entry.Value);
-                Console.WriteLine("I now have server padints :" + entry.Key + " with this amount: " + entry.Value.Count);
+              if (!padIntStorage.ContainsKey(entry.Key))
+              {
+                padIntStorage.Add(entry.Key, new Hashtable());
+              }
+              Hashtable myHash;
+              padIntStorage.TryGetValue(entry.Key, out myHash);
+              foreach (KeyValuePair<int, RealPadInt> pad in entry.Value)
+              {
+                myHash.Add(pad.Key, pad.Value);
+                CreateOnMySafeCopy(pad.Key, pad.Value);
+              }
+              otherSafeCopies.Remove(serverId);
+
+              return true;
             }
-            otherSafeCopies.Remove(serverId);
 
-            return true;
-          }
-
-          if (serverId == (id + 1) % dataServersTable.getNumberOfServers()) //dead server had my backup copy
-          {
-            Console.WriteLine("server " + serverId + " had my safe copy. I am " + id);
-
-            Dictionary<int, string> dic = dataServersTable.getDictionary();
-            String url;
-            int backupServerId = (id + 2) % dataServersTable.getNumberOfServers();
-            dic.TryGetValue(backupServerId, out url);
-
-            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
-            myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
-            myPadIntSafeCopy.Remove(id);
-
-            foreach (KeyValuePair<int, Hashtable> entry in padIntStorage)
+            if (serverId == (id + 1) % dataServersTable.getNumberOfServers()) //dead server had my backup copy
             {
-      
-              
-              myPadIntSafeCopy.Add(entry.Key, entry.Value);
+              Console.WriteLine("server " + serverId + " had my copy. I am " + id);
+
+              Dictionary<int, string> dic = dataServersTable.getDictionary();
+              String url;
+              int backupServerId = (id + 2) % dataServersTable.getNumberOfServers();
+              dic.TryGetValue(backupServerId, out url);
+
+              DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+              copyHolder.createOthersSafeCopy(id);
+
+              foreach (KeyValuePair<int, Hashtable> entry in padIntStorage)
+              {
+                Hashtable myHash = entry.Value;
+                foreach (KeyValuePair<int, RealPadInt> pad in entry.Value)
+                {
+                  CreateOnMySafeCopy(pad.Key, pad.Value);
+                }
+              }
+
+              Console.WriteLine("My safe copy is now at: " + copyHolder.getId());
+
+
+              return true;
             }
 
-            Console.WriteLine("my safe copy is now at" + copyHolder.getId());
 
-
-            return true;
           }
-
           return false;
 
-        } 
+        }
       
-        public Dictionary<int, Hashtable> getPadIntSafeCopy(int serverId)
-        {
-          Dictionary<int, Hashtable> pisc;
-          if (otherSafeCopies.ContainsKey(serverId))
-          {
-            otherSafeCopies.TryGetValue(serverId, out pisc);
-            return pisc;
-          }
-          pisc = new Dictionary<int, Hashtable>();
-          pisc.Add(serverId, new Hashtable());
-          otherSafeCopies.Add(serverId, pisc);
-          return pisc;
+
+        public void CreateOnMySafeCopy( int correspondingId, RealPadInt padInt)
+        {      
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
+            dic.TryGetValue(backupServerId, out url);
+
+            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); 
+
+            copyHolder.CreateOnOthersSafeCopy(id, correspondingId, padInt);
         }
 
-        public void getRefToMySafeCopy()
+        public void WriteOnMySafeCopy( int correspondingId, RealPadInt padInt)
+        {  
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
+            dic.TryGetValue(backupServerId, out url);
+
+            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); 
+
+            copyHolder.WriteOnOthersSafeCopy(id, correspondingId, padInt);
+        }
+
+        public void DeleteOnMySafeCopy(int correspondingId, int padIntId)
         {
           Dictionary<int, string> dic = dataServersTable.getDictionary();
           String url;
           int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
           dic.TryGetValue(backupServerId, out url);
 
-            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
-            myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+          DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url);
 
-            Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
+          copyHolder.DeleteOnOthersSafeCopy(id, correspondingId, padIntId);
         }
 
-        public RealPadInt CreatePadIntSafeCopy(int uid) {
-            int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
-            RealPadInt pad = new RealPadInt(uid);
-            Hashtable safeCopy;
-            if (myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy)) {
-                safeCopy.Add(uid, pad);
-                Console.WriteLine("SafeCopy : created in server ");
+        public void CreateOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
+        {
+          if (otherSafeCopies.ContainsKey(ownerId))
+          {
+            Dictionary<int, Hashtable> safeCopyDict;
+            otherSafeCopies.TryGetValue(ownerId, out safeCopyDict);
+            if (!safeCopyDict.ContainsKey(correspondingId))
+            {
+              safeCopyDict.Add(correspondingId, new Hashtable());
             }
-            return pad;
+              Hashtable safeCopy;
+              safeCopyDict.TryGetValue(correspondingId, out safeCopy);
+              if (!safeCopy.ContainsKey(padInt.ID))
+              {
+                safeCopy.Add(padInt.ID, padInt);
+              }
+            }
+          }
+        
+
+        public void WriteOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
+        {
+          if(otherSafeCopies.ContainsKey(ownerId)){
+            Dictionary<int, Hashtable> safeCopyDict;
+            otherSafeCopies.TryGetValue(ownerId, out safeCopyDict);
+            if (safeCopyDict.ContainsKey(correspondingId))
+            {
+              Hashtable safeCopy;
+              safeCopyDict.TryGetValue(correspondingId, out safeCopy);
+              safeCopy.Remove(padInt.ID);
+              safeCopy.Add(padInt.ID, padInt);
+            }
+          }
         }
 
-        public RealPadInt AccessPadIntSafeCopy(int uid)
+        public void DeleteOnOthersSafeCopy(int ownerId, int correspondingId, int padIntId)
         {
-          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
-          Hashtable safeCopy;
-          myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
-          return (RealPadInt) safeCopy[uid];
+          if (otherSafeCopies.ContainsKey(ownerId))
+          {
+            Dictionary<int, Hashtable> safeCopyDict;
+            otherSafeCopies.TryGetValue(ownerId, out safeCopyDict);
+            if (safeCopyDict.ContainsKey(correspondingId))
+            {
+              Hashtable safeCopy;
+              safeCopyDict.TryGetValue(correspondingId, out safeCopy);
+              safeCopy.Remove(padIntId);
+            }
+          }
+
         }
 
-        public void DeletePadIntSafeCopy(int uid)
-        {
-          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
-          Hashtable safeCopy;
-          if(myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy))
-            safeCopy.Remove(uid);
+        public void CreateMySafeCopy() {
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
+            dic.TryGetValue(backupServerId, out url);
+            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+            copyHolder.createOthersSafeCopy(id);
+        }
 
+        public void createOthersSafeCopy(int otherId)
+        {
+          if (!otherSafeCopies.ContainsKey(otherId))
+          {
+            Dictionary<int, Hashtable> newDict = new Dictionary<int, Hashtable>();
+            newDict.Add(otherId, new Hashtable());
+            otherSafeCopies.Add(otherId, newDict);
+          }
+        }
+
+        public void CreatePadIntSafeCopy(RealPadInt p)
+        {
+          int correspondingServer = p.ID % dataServersTable.getNumberOfServers();
+          CreateOnMySafeCopy(correspondingServer, p);
+        }
+
+        public void WritePadIntSafeCopy(RealPadInt p)
+        {
+          int correspondingServer = p.ID % dataServersTable.getNumberOfServers();
+          WriteOnMySafeCopy(correspondingServer, p);
+        }
+
+        public void DeletePadIntSafeCopy(int padIntId)
+        {
+          int correspondingServer = padIntId % dataServersTable.getNumberOfServers();
+          DeleteOnMySafeCopy(correspondingServer, padIntId);
+        }
+
+        public void WriteCommit(RealPadInt padInt)
+        {
+          checkFreezeStatus();
+          padInt.writeCommit();
+          int correspondingServer = padInt.ID % dataServersTable.getNumberOfServers();
+          WriteOnMySafeCopy(correspondingServer, padInt);
+          
         }
 
         public void checkFreezeStatus() {
@@ -208,6 +296,7 @@ namespace PADIDSTM {
                 }
             }
         }
+
 
 
         public  void WriteCommit() {
@@ -233,28 +322,24 @@ namespace PADIDSTM {
             return pad;
 
         }
-
         public RealPadInt AccessPadInt(int uid) {
-            checkFreezeStatus();
-            Console.WriteLine("uid being accessed is " + uid);
-            int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
-            Console.WriteLine("and is in server " + correspondingServer);
-            if (!padIntStorage.ContainsKey(correspondingServer)) {
-                Console.WriteLine("I " + id + " dont have the table " + correspondingServer);
-                return null;
-            }
+          checkFreezeStatus();
+          int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
-            Hashtable safeCopy;
-            padIntStorage.TryGetValue(correspondingServer, out safeCopy);
-            if (safeCopy == null)
-                Console.WriteLine("safeCopy is null");
-            if (!safeCopy.ContainsKey(uid)) {
-                Console.WriteLine("safecopy has this number of padints: " + safeCopy.Count);
-                Console.WriteLine("safeCopy don´t contain key " + uid);
-                return null;
-            }
+          if (!padIntStorage.ContainsKey(correspondingServer))
+          {
+            return null;
+          }
 
-            return (RealPadInt)safeCopy[uid];
+          Hashtable safeCopy;
+          padIntStorage.TryGetValue(correspondingServer, out safeCopy);
+
+          if (!safeCopy.ContainsKey(uid))
+          {
+            return null;
+          }
+
+          return (RealPadInt)safeCopy[uid];
 
         }
 
@@ -329,6 +414,7 @@ namespace PADIDSTM {
                     Console.WriteLine("Waiting for a recover... ");
 
                     // Perform a blocking call to accept requests. 
+                    // You could also user server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
                     client.Close();
                     if (state != State.Working)
