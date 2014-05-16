@@ -63,8 +63,8 @@ namespace PADIDSTM {
                 }
                 return true;
             } catch (Exception e) {
-                Console.WriteLine(e.Message);
-                throw new Exception("Fodasse") ;
+                Console.WriteLine(e.StackTrace);
+                throw new TxException("TxCommit: " + e.Message) ;
             }
         }
         public static bool TxAbort() {

@@ -65,6 +65,7 @@ namespace PADIDSTM {
             int port = 1001;
             for (int i = 0; i < nrOfServers; i++) {
                 dataProcesses.Add(Process.Start(dataServerExeLocation, (port + i).ToString()));
+                Thread.Sleep(200);
             }
         }
 
