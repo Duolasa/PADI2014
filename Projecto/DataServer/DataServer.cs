@@ -102,9 +102,9 @@ namespace PADIDSTM {
 
             foreach (KeyValuePair<int, Hashtable> entry in safeCopy)
             {
-              Hashtable clone = new Hashtable(entry.Value);
-              padIntStorage.Add(entry.Key, clone);
-              myPadIntSafeCopy.Add(entry.Key, (Hashtable) clone.Clone());
+              padIntStorage.Add(entry.Key, entry.Value);
+              myPadIntSafeCopy.Add(entry.Key, entry.Value);
+                Console.WriteLine("I now have server padints :" + entry.Key + " with this amount: " + entry.Value.Count);
             }
             otherSafeCopies.Remove(serverId);
 
@@ -126,9 +126,9 @@ namespace PADIDSTM {
 
             foreach (KeyValuePair<int, Hashtable> entry in padIntStorage)
             {
-              Hashtable clone = new Hashtable(entry.Value);
+      
               
-              myPadIntSafeCopy.Add(entry.Key, clone);
+              myPadIntSafeCopy.Add(entry.Key, entry.Value);
             }
 
             Console.WriteLine("my safe copy is now at" + copyHolder.getId());
@@ -174,7 +174,7 @@ namespace PADIDSTM {
             Hashtable safeCopy;
             if (myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy)) {
                 safeCopy.Add(uid, pad);
-                Console.WriteLine("SafeCopy : " + safeCopy.Count);
+                Console.WriteLine("SafeCopy : created in server ");
             }
             return pad;
         }
@@ -207,6 +207,12 @@ namespace PADIDSTM {
                     Monitor.Wait(lockedObject);
                 }
             }
+        }
+
+
+        public  void WriteCommit(RealPadInt padInt) {
+            checkFreezeStatus();
+            padInt.writeCommit();
         }
 
         public RealPadInt CreatePadInt(int uid) {
@@ -324,7 +330,6 @@ namespace PADIDSTM {
                     Console.WriteLine("Waiting for a recover... ");
 
                     // Perform a blocking call to accept requests. 
-                    // You could also user server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
                     client.Close();
                     if (state != State.Working)

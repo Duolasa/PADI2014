@@ -30,6 +30,7 @@ namespace PADIDSTM
 
         RealPadInt CreatePadIntSafeCopy(int uid);
         RealPadInt AccessPadIntSafeCopy(int uid);
+        void WriteCommit(RealPadInt uid);
         void DeletePadIntSafeCopy(int uid);
 
 
