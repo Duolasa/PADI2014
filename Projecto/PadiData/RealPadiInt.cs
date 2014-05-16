@@ -103,6 +103,10 @@ namespace PADIDSTM
     {
       value = v;
     }
+    public int DirectRead()
+    {
+      return value;
+    }
 
   }
 }

@@ -49,7 +49,7 @@ namespace PADIDSTM {
                   {
                     string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
                     IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
-                    dataServer.WriteCommit(padint.RealPadInt);
+                    dataServer.WriteCommit(padint.RealPadInt.ID, padint.RealPadInt.DirectRead());
                   }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {
@@ -81,7 +81,8 @@ namespace PADIDSTM {
                   string url = dataServersPorts.getServerByPadiIntID(i);
                   IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
                   dataServer.DeletePadInt(i);
-                  dataServer.DeletePadIntSafeCopy(i);
+                  int correspondingServer = (i) % dataServersPorts.getNumberOfServers();
+                  dataServer.DeleteOnMySafeCopy(correspondingServer, i);
 
                 }
                 return true;
@@ -146,7 +147,8 @@ namespace PADIDSTM {
             PadIntHolder pHolder = null;
             if (p != null) {
                 createdPadInts.Add(uid);
-                dataServer.CreateOnMySafeCopy(dataServer.getId(),p);
+                int correspondingServer = (p.ID) % dataServersPorts.getNumberOfServers();
+                dataServer.CreateOnMySafeCopy(correspondingServer, p.ID, p.DirectRead());
                 pHolder = new PadIntHolder(currentTXID, p);
                 updatedPadInts.Add(pHolder);
             }

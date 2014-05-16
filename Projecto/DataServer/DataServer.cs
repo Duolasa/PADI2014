@@ -110,7 +110,7 @@ namespace PADIDSTM {
               foreach (KeyValuePair<int, RealPadInt> pad in entry.Value)
               {
                 myHash.Add(pad.Key, pad.Value);
-                CreateOnMySafeCopy(pad.Key, pad.Value);
+                CreateOnMySafeCopy(pad.Key, pad.Value.ID, pad.Value.DirectRead());
               }
               otherSafeCopies.Remove(serverId);
 
@@ -134,7 +134,7 @@ namespace PADIDSTM {
                 Hashtable myHash = entry.Value;
                 foreach (KeyValuePair<int, RealPadInt> pad in entry.Value)
                 {
-                  CreateOnMySafeCopy(pad.Key, pad.Value);
+                  CreateOnMySafeCopy(pad.Key, pad.Value.ID, pad.Value.DirectRead());
                 }
               }
 
@@ -149,9 +149,9 @@ namespace PADIDSTM {
           return false;
 
         }
-      
 
-        public void CreateOnMySafeCopy( int correspondingId, RealPadInt padInt)
+
+        public void CreateOnMySafeCopy(int correspondingId, int padId, int padValue)
         {      
             Dictionary<int, string> dic = dataServersTable.getDictionary();
             String url;
@@ -160,10 +160,10 @@ namespace PADIDSTM {
 
             DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); 
 
-            copyHolder.CreateOnOthersSafeCopy(id, correspondingId, padInt);
+            copyHolder.CreateOnOthersSafeCopy(id, correspondingId, padId, padValue);
         }
 
-        public void WriteOnMySafeCopy( int correspondingId, RealPadInt padInt)
+        public void WriteOnMySafeCopy(int correspondingId, int padId, int padValue)
         {  
             Dictionary<int, string> dic = dataServersTable.getDictionary();
             String url;
@@ -172,7 +172,7 @@ namespace PADIDSTM {
 
             DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); 
 
-            copyHolder.WriteOnOthersSafeCopy(id, correspondingId, padInt);
+            copyHolder.WriteOnOthersSafeCopy(id, correspondingId, padId, padValue);
         }
 
         public void DeleteOnMySafeCopy(int correspondingId, int padIntId)
@@ -187,7 +187,7 @@ namespace PADIDSTM {
           copyHolder.DeleteOnOthersSafeCopy(id, correspondingId, padIntId);
         }
 
-        public void CreateOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
+        public void CreateOnOthersSafeCopy(int ownerId, int correspondingId, int padId, int padValue)
         {
           if (otherSafeCopies.ContainsKey(ownerId))
           {
@@ -199,15 +199,17 @@ namespace PADIDSTM {
             }
               Hashtable safeCopy;
               safeCopyDict.TryGetValue(correspondingId, out safeCopy);
-              if (!safeCopy.ContainsKey(padInt.ID))
+              if (!safeCopy.ContainsKey(padId))
               {
+                RealPadInt padInt = new RealPadInt(padId);
+                padInt.DirectWrite(padValue);
                 safeCopy.Add(padInt.ID, padInt);
               }
             }
           }
-        
 
-        public void WriteOnOthersSafeCopy(int ownerId, int correspondingId, RealPadInt padInt)
+
+        public void WriteOnOthersSafeCopy(int ownerId, int correspondingId, int padId, int padValue)
         {
           if(otherSafeCopies.ContainsKey(ownerId)){
             Dictionary<int, Hashtable> safeCopyDict;
@@ -216,8 +218,8 @@ namespace PADIDSTM {
             {
               Hashtable safeCopy;
               safeCopyDict.TryGetValue(correspondingId, out safeCopy);
-              safeCopy.Remove(padInt.ID);
-              safeCopy.Add(padInt.ID, padInt);
+              RealPadInt padInt = (RealPadInt) safeCopy[padId];
+              padInt.DirectWrite(padValue);
             }
           }
         }
@@ -257,30 +259,11 @@ namespace PADIDSTM {
           }
         }
 
-        public void CreatePadIntSafeCopy(RealPadInt p)
-        {
-          int correspondingServer = p.ID % dataServersTable.getNumberOfServers();
-          CreateOnMySafeCopy(correspondingServer, p);
-        }
-
-        public void WritePadIntSafeCopy(RealPadInt p)
-        {
-          int correspondingServer = p.ID % dataServersTable.getNumberOfServers();
-          WriteOnMySafeCopy(correspondingServer, p);
-        }
-
-        public void DeletePadIntSafeCopy(int padIntId)
-        {
-          int correspondingServer = padIntId % dataServersTable.getNumberOfServers();
-          DeleteOnMySafeCopy(correspondingServer, padIntId);
-        }
-
-        public void WriteCommit(RealPadInt padInt)
+        public void WriteCommit(int padId, int padValue)
         {
           checkFreezeStatus();
-          padInt.writeCommit();
-          int correspondingServer = padInt.ID % dataServersTable.getNumberOfServers();
-          WriteOnMySafeCopy(correspondingServer, padInt);
+          int correspondingId = padId % dataServersTable.getNumberOfServers();
+          WriteOnMySafeCopy(correspondingId, padId, padValue);
           
         }
 
