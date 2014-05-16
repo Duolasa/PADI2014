@@ -18,7 +18,6 @@ namespace PADIDSTM {
         private System.Object lockDataServers = new System.Object();
         private System.Object lockTransactionId = new System.Object();
         private static List<Process> dataProcesses = new List<Process>();
-        private static Process thisProcess;
         private static int transactionsId = 0;
         private static int nrOfDataServers = 0;
 
@@ -31,14 +30,6 @@ namespace PADIDSTM {
             sendTableToDataServers();
             initiateDataServersCopy();
             launchHeartBeatWorker();
-            thisProcess = Process.GetCurrentProcess();
-            thisProcess.EnableRaisingEvents = true;
-            thisProcess.Exited += (sender, e) => {
-                foreach (Process p in dataProcesses) {
-                    Console.WriteLine("deleting processes");
-                    p.Kill();
-                }
-            };
             Console.ReadLine();
         }
 

@@ -29,8 +29,13 @@ namespace PADIDSTM {
 
                 PadiDstm.Status();
                 Console.WriteLine("Testing recover server 1");
-                res = PadiDstm.Freeze("tcp://localhost:1001/Server");
+                res = PadiDstm.Fail("tcp://localhost:1001/Server");
                 PadiDstm.Status();
+                Console.ReadLine();
+                pi_a = PadiDstm.AccessPadInt(0);
+                Console.WriteLine("a = " + pi_a.Read());
+                Console.ReadLine();
+                res = PadiDstm.Recover("tcp://localhost:1001/Server");
                 pi_a = PadiDstm.AccessPadInt(0);
                 Console.WriteLine("a = " + pi_a.Read());
 

@@ -13,8 +13,8 @@ namespace PADIDSTM
         public const string BASE_URL = "tcp://localhost:";
         public const int TIME_TO_WAIT_FOR_TRANSACTION = 3000;
         public const int ADMIN_PORT = 1337;
-        public const int HEARTBEAT_INTERVAL = 4000;
-        public const int HEARTBEAT_INTERVAL_CHECK = 10000;
+        public const int HEARTBEAT_INTERVAL = 2500;
+        public const int HEARTBEAT_INTERVAL_CHECK = 5000;
 
         public static string getDataServerUrl(int port) 
         {
