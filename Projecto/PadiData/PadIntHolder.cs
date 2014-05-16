@@ -28,7 +28,7 @@ namespace PADIDSTM {
             try {
                 return realPadInt.Read(txID);
             } catch (Exception e) {
-                throw new TxException("Read!!", e);
+                throw new TxException("padInt.Read: " + e.Message, e);
             }
 
 

@@ -50,6 +50,7 @@ namespace PADIDSTM {
                     string url = dataServersPorts.getServerByPadiIntID(padint.RealPadInt.ID);
                     IData dataServer = (IData)Activator.GetObject(typeof(IData), url);
                     dataServer.WriteCommit(padint.RealPadInt.ID, padint.RealPadInt.DirectRead());
+                    padint.RealPadInt.writeCommit();
                   }
                 }
                 foreach (PadIntHolder padint in updatedPadInts) {

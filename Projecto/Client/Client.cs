@@ -16,25 +16,14 @@ namespace PADIDSTM {
 
             try {
                 Console.ReadLine();
-                Console.WriteLine("Going to init");
                 PadiDstm.Init();
-                Console.WriteLine("Inited");
                 res = PadiDstm.TxBegin();
-                Console.WriteLine("Begi");
                 PadInt pi_a = PadiDstm.CreatePadInt(0);
-                Console.WriteLine("CREATE");
                 pi_a.Write(36);
-                Console.WriteLine("WRITE");
                 PadInt pi_b = PadiDstm.CreatePadInt(1);
-                Console.WriteLine("CREATE");
                 pi_b.Write(37);
-                Console.WriteLine("WRITE");
-                Console.WriteLine("Going to freeze");
-             //   res = PadiDstm.Freeze("tcp://localhost:1001/Server");
-                Console.WriteLine("Freeze");
                 res = PadiDstm.TxCommit();
-
-                /*res = PadiDstm.TxBegin();
+                res = PadiDstm.TxBegin();
 
                 PadiDstm.Status();
                 Console.WriteLine("Testing recover server 1");
@@ -42,11 +31,13 @@ namespace PADIDSTM {
                 PadiDstm.Status();
                 Console.ReadLine();
                 pi_a = PadiDstm.AccessPadInt(0);
+                if (pi_a == null)
+                    Console.WriteLine("NULL");
                 Console.WriteLine("a = " + pi_a.Read());
                 Console.ReadLine();
                 res = PadiDstm.Recover("tcp://localhost:1001/Server");
                 pi_a = PadiDstm.AccessPadInt(0);
-                Console.WriteLine("a = " + pi_a.Read());*/
+                Console.WriteLine("a = " + pi_a.Read());
 
                 //PadInt pi_d = PadiDstm.CreatePadInt(3);
                 //pi_d.Write(55);
