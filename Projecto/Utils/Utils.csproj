@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PadIntSafeCopy.cs" />
     <Compile Include="ServerHashTable.cs" />
     <Compile Include="TxException.cs" />
     <Compile Include="Utils.cs" />

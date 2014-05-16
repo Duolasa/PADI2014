@@ -27,8 +27,14 @@ namespace PADIDSTM {
         static private object requestQueueLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
+<<<<<<< HEAD
+        static private PadIntSafeCopy myPadIntSafeCopy;
+        static private Dictionary<int, PadIntSafeCopy> otherSafeCopies = new Dictionary<int, PadIntSafeCopy>();
+        static private List<Object> requestQueue = new List<Object>();
+=======
         static private Dictionary<int, Hashtable> myPadIntSafeCopy = new Dictionary<int, Hashtable>();
         static private Dictionary<int, Dictionary<int, Hashtable>> otherSafeCopies = new Dictionary<int, Dictionary<int, Hashtable>>();
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
 
         static void Main(string[] args) {
             //Console.WriteLine(args);
@@ -91,6 +97,23 @@ namespace PADIDSTM {
             dataServersTable = dataServers;
         }
 
+<<<<<<< HEAD
+        public PadIntSafeCopy getPadIntSafeCopy(int serverId) {
+            PadIntSafeCopy pisc;
+            if (otherSafeCopies.ContainsKey(serverId)) {
+                otherSafeCopies.TryGetValue(serverId, out pisc);
+                return pisc;
+            }
+            pisc = new PadIntSafeCopy(serverId);
+            otherSafeCopies.Add(serverId, pisc);
+            return pisc;
+        }
+
+        public void getRefToMySafeCopy() {
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
+=======
         public bool ServerHasDied(int id)
         {
           if (otherSafeCopies.ContainsKey(id))
@@ -124,6 +147,7 @@ namespace PADIDSTM {
           String url;
           int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
           dic.TryGetValue(backupServerId, out url);
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
 
             DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
             myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
@@ -131,8 +155,13 @@ namespace PADIDSTM {
             Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
+<<<<<<< HEAD
         public RealPadInt CreatePadIntSafeCopy(int uid) {
+=======
+        public RealPadInt CreatePadIntSafeCopy(int uid)
+        {
             int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
             RealPadInt pad = new RealPadInt(uid);
             Hashtable safeCopy;
             myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
@@ -140,6 +169,14 @@ namespace PADIDSTM {
             return pad;
         }
 
+<<<<<<< HEAD
+        public RealPadInt AccessPadIntSafeCopy(int uid) {
+            return (RealPadInt)myPadIntSafeCopy.PadIntStorage[uid];
+        }
+
+        public void DeletePadIntSafeCopy(int uid) {
+            myPadIntSafeCopy.PadIntStorage.Remove(uid);
+=======
         public RealPadInt AccessPadIntSafeCopy(int uid)
         {
           int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
@@ -154,6 +191,7 @@ namespace PADIDSTM {
           Hashtable safeCopy;
           myPadIntSafeCopy.TryGetValue(correspondingServer, out safeCopy);
           safeCopy.Remove(uid);
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
 
         }
 
@@ -171,7 +209,10 @@ namespace PADIDSTM {
         }
 
         public RealPadInt CreatePadInt(int uid) {
-			 checkFreezeStatus();
+<<<<<<< HEAD
+            checkFreezeStatus();
+            if (padIntStorage.ContainsKey(uid)) {
+=======
             int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
           if (!padIntStorage.ContainsKey(correspondingServer)) {
@@ -181,6 +222,7 @@ namespace PADIDSTM {
             padIntStorage.TryGetValue(correspondingServer, out safeCopy);
 
             if (safeCopy.ContainsKey(uid)) {
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
                 return null;
             }
 
@@ -190,8 +232,14 @@ namespace PADIDSTM {
 
         }
         public RealPadInt AccessPadInt(int uid) {
-checkFreezeStatus();
+<<<<<<< HEAD
+            checkFreezeStatus();
+            if (!(padIntStorage.ContainsKey(uid))) {
+                return null;
+            }
+=======
           int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
 
           if (!padIntStorage.ContainsKey(correspondingServer))
           {
@@ -210,6 +258,10 @@ checkFreezeStatus();
 
         }
 
+<<<<<<< HEAD
+        public void DeletePadInt(int uid) {
+            padIntStorage.Remove(uid);
+=======
         public void DeletePadInt(int uid)
         {
           int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
@@ -221,6 +273,7 @@ checkFreezeStatus();
           Hashtable safeCopy;
           padIntStorage.TryGetValue(correspondingServer, out safeCopy);
           safeCopy.Remove(uid);
+>>>>>>> b33cd136e2065ac6beba7057aabc7599a0772ba1
         }
 
 

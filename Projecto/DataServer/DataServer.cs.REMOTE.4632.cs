@@ -13,8 +13,8 @@ using System.Net.Sockets;
 
 namespace PADIDSTM {
     public class DataServer : MarshalByRefObject, IData {
-        static DataServerWorker worker;
-        static DataServerWorker heartBeatWorker;
+      static DataServerWorker worker;
+      static DataServerWorker heartBeatWorker;
         static TcpChannel remoteChannel;
         static TcpChannel adminChannel;
         static IMaster masterServer;
@@ -24,7 +24,6 @@ namespace PADIDSTM {
         static private ServerHashTable dataServersTable = new ServerHashTable();
         static private Dictionary<int,Hashtable> padIntStorage = new Dictionary<int, Hashtable>();
         static private object statusChangeLock = new object();
-        static private object requestQueueLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
         static private Dictionary<int, Hashtable> myPadIntSafeCopy = new Dictionary<int, Hashtable>();
@@ -42,20 +41,20 @@ namespace PADIDSTM {
             adminPort = port + Utils.ADMIN_PORT;
             getMasterServer();
             registerDataServer();
-            launchRecoverCommandThread();
             launchHeartBeatThread();
             Console.ReadLine();
 
         }
 
 
-        static void launchHeartBeatThread() {
-            heartBeatWorker = new DataServerWorker();
-            Thread heartBeatWorkerThread = new Thread(heartBeatWorker.heartBeatWorker);
-            heartBeatWorkerThread.Start();
+        static void launchHeartBeatThread()
+        {
+          heartBeatWorker = new DataServerWorker();
+          Thread heartBeatWorkerThread = new Thread(heartBeatWorker.heartBeatWorker);
+          heartBeatWorkerThread.Start();
         }
         static void launchRecoverCommandThread() {
-            worker = new DataServerWorker();
+          worker = new DataServerWorker();
             Thread workerThread = new Thread(worker.waitForRecover);
             workerThread.Start();
         }
@@ -125,13 +124,14 @@ namespace PADIDSTM {
           int backupServerId = (id + 1) % dataServersTable.getNumberOfServers();
           dic.TryGetValue(backupServerId, out url);
 
-            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
-            myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+          DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+          myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
 
-            Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
+          Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
-        public RealPadInt CreatePadIntSafeCopy(int uid) {
+        public RealPadInt CreatePadIntSafeCopy(int uid)
+        {
             int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
             RealPadInt pad = new RealPadInt(uid);
             Hashtable safeCopy;
@@ -157,21 +157,7 @@ namespace PADIDSTM {
 
         }
 
-        public void checkFreezeStatus() {
-            if (state == State.Frozen) {
-                Console.WriteLine("freezing");
-                Object lockedObject = new Object();
-                lock (requestQueueLock) {
-                    requestQueue.Add(lockedObject);
-                }
-                lock (lockedObject) {
-                    Monitor.Wait(lockedObject);
-                }
-            }
-        }
-
         public RealPadInt CreatePadInt(int uid) {
-			 checkFreezeStatus();
             int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
           if (!padIntStorage.ContainsKey(correspondingServer)) {
@@ -190,7 +176,6 @@ namespace PADIDSTM {
 
         }
         public RealPadInt AccessPadInt(int uid) {
-checkFreezeStatus();
           int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
 
           if (!padIntStorage.ContainsKey(correspondingServer))
@@ -242,26 +227,17 @@ checkFreezeStatus();
 
         public void fail() {
             setStatus(State.Failed);
+            ChannelServices.UnregisterChannel(remoteChannel);
         }
 
         public void freeze() {
             setStatus(State.Frozen);
-
-
+            ChannelServices.UnregisterChannel(remoteChannel);
         }
 
         static void recover() {
-            Console.WriteLine("entered request QueueLock");
+            ChannelServices.RegisterChannel(remoteChannel, true);
             setStatus(State.Working);
-            lock (requestQueueLock) {
-                Console.WriteLine("entered request QueueLock");
-                foreach (object obj in requestQueue) {
-                    lock (obj) {
-                        Monitor.Pulse(obj);
-                    }
-                }
-                requestQueue.Clear();
-            }
         }
 
         private class DataServerWorker {
@@ -284,21 +260,24 @@ checkFreezeStatus();
                     // You could also user server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
                     client.Close();
-                    if (state != State.Working)
+                    Console.WriteLine("Going To Recover!");
+                    if(state == State.Failed)
                         recover();
 
                 }
             }
 
-            public void heartBeatWorker() {
-                while (true) {
-                    if (state == State.Failed) {
-                        Thread.Sleep(1000);
-                        continue;
-                    }
-                    Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
-                    masterServer.iAmAlive(id);
-                }
+            public void heartBeatWorker()
+            {
+              while (true)
+              {
+                  if (state == State.Failed) {
+                      Thread.Sleep(1000);
+                      continue;
+                  }
+                Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
+                masterServer.iAmAlive(id);
+              }
             }
         }
     }
