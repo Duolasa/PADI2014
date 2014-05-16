@@ -19,8 +19,8 @@ namespace PADIDSTM {
                 PadiDstm.Init();
                 Console.WriteLine("INIT");
 
-
-                res = PadiDstm.TxBegin();
+                res = PadiDstm.Recover("tcp://localhost:1001/Server");
+                /*res = PadiDstm.TxBegin();
                 Console.WriteLine("BEGIN");
                 PadInt pi_a = PadiDstm.AccessPadInt(0);
                 Console.WriteLine("ACCESS 0");
@@ -40,7 +40,7 @@ namespace PADIDSTM {
                 res = PadiDstm.Recover("tcp://localhost:1001/Server");
                 res = PadiDstm.Fail("tcp://localhost:1002/Server");
                 PadiDstm.Status();
-                res = PadiDstm.TxCommit();
+                res = PadiDstm.TxCommit();*/
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
             }

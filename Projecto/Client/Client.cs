@@ -29,9 +29,9 @@ namespace PADIDSTM {
 
                 PadiDstm.Status();
                 Console.WriteLine("Testing recover server 1");
-                res = PadiDstm.Fail("tcp://localhost:1001/Server");
+                res = PadiDstm.Freeze("tcp://localhost:1001/Server");
                 PadiDstm.Status();
-                pi_a = PadiDstm.AccessPadInt(1);
+                pi_a = PadiDstm.AccessPadInt(0);
                 Console.WriteLine("a = " + pi_a.Read());
 
                 //PadInt pi_d = PadiDstm.CreatePadInt(3);
@@ -47,6 +47,7 @@ namespace PADIDSTM {
                 res = PadiDstm.TxCommit();
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
+                Console.ReadLine();
             }
 
             Console.ReadLine();

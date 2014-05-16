@@ -13,8 +13,8 @@ using System.Net.Sockets;
 
 namespace PADIDSTM {
     public class DataServer : MarshalByRefObject, IData {
-      static DataServerWorker worker;
-      static DataServerWorker heartBeatWorker;
+        static DataServerWorker worker;
+        static DataServerWorker heartBeatWorker;
         static TcpChannel remoteChannel;
         static TcpChannel adminChannel;
         static IMaster masterServer;
@@ -24,10 +24,12 @@ namespace PADIDSTM {
         static private ServerHashTable dataServersTable = new ServerHashTable();
         static private Hashtable padIntStorage = new Hashtable();
         static private object statusChangeLock = new object();
+        static private object requestQueueLock = new object();
         public enum State { Working, Failed, Frozen };
         static private State state = State.Working;
         static private PadIntSafeCopy myPadIntSafeCopy;
-        static private Dictionary<int, PadIntSafeCopy> otherSafeCopies = new Dictionary<int,PadIntSafeCopy>();
+        static private Dictionary<int, PadIntSafeCopy> otherSafeCopies = new Dictionary<int, PadIntSafeCopy>();
+        static private List<Object> requestQueue = new List<Object>();
 
         static void Main(string[] args) {
             //Console.WriteLine(args);
@@ -41,20 +43,20 @@ namespace PADIDSTM {
             adminPort = port + Utils.ADMIN_PORT;
             getMasterServer();
             registerDataServer();
+            launchRecoverCommandThread();
             launchHeartBeatThread();
             Console.ReadLine();
 
         }
 
 
-        static void launchHeartBeatThread()
-        {
-          heartBeatWorker = new DataServerWorker();
-          Thread heartBeatWorkerThread = new Thread(heartBeatWorker.heartBeatWorker);
-          heartBeatWorkerThread.Start();
+        static void launchHeartBeatThread() {
+            heartBeatWorker = new DataServerWorker();
+            Thread heartBeatWorkerThread = new Thread(heartBeatWorker.heartBeatWorker);
+            heartBeatWorkerThread.Start();
         }
         static void launchRecoverCommandThread() {
-          worker = new DataServerWorker();
+            worker = new DataServerWorker();
             Thread workerThread = new Thread(worker.waitForRecover);
             workerThread.Start();
         }
@@ -89,50 +91,58 @@ namespace PADIDSTM {
             dataServersTable = dataServers;
         }
 
-        public PadIntSafeCopy getPadIntSafeCopy(int serverId)
-        {
-          PadIntSafeCopy pisc;
-          if (otherSafeCopies.ContainsKey(serverId))
-          {
-            otherSafeCopies.TryGetValue(serverId, out pisc);
+        public PadIntSafeCopy getPadIntSafeCopy(int serverId) {
+            PadIntSafeCopy pisc;
+            if (otherSafeCopies.ContainsKey(serverId)) {
+                otherSafeCopies.TryGetValue(serverId, out pisc);
+                return pisc;
+            }
+            pisc = new PadIntSafeCopy(serverId);
+            otherSafeCopies.Add(serverId, pisc);
             return pisc;
-          }
-          pisc = new PadIntSafeCopy(serverId);
-          otherSafeCopies.Add(serverId, pisc);
-          return pisc;
         }
 
-        public void getRefToMySafeCopy()
-        {
-          Dictionary<int, string> dic = dataServersTable.getDictionary();
-          String url;
-          dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
+        public void getRefToMySafeCopy() {
+            Dictionary<int, string> dic = dataServersTable.getDictionary();
+            String url;
+            dic.TryGetValue((id + 1) % dataServersTable.getNumberOfServers(), out url);
 
-          DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
-          myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
+            DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
+            myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
 
-          Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
+            Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
-        public RealPadInt CreatePadIntSafeCopy(int uid)
-        {
+        public RealPadInt CreatePadIntSafeCopy(int uid) {
             RealPadInt pad = new RealPadInt(uid);
             myPadIntSafeCopy.PadIntStorage.Add(uid, pad);
             return pad;
         }
 
-        public RealPadInt AccessPadIntSafeCopy(int uid)
-        {
-          return (RealPadInt) myPadIntSafeCopy.PadIntStorage[uid];
+        public RealPadInt AccessPadIntSafeCopy(int uid) {
+            return (RealPadInt)myPadIntSafeCopy.PadIntStorage[uid];
         }
 
-        public void DeletePadIntSafeCopy(int uid)
-        {
-          myPadIntSafeCopy.PadIntStorage.Remove(uid);
+        public void DeletePadIntSafeCopy(int uid) {
+            myPadIntSafeCopy.PadIntStorage.Remove(uid);
 
+        }
+
+        public void checkFreezeStatus() {
+            if (state == State.Frozen) {
+                Console.WriteLine("freezing");
+                Object lockedObject = new Object();
+                lock (requestQueueLock) {
+                    requestQueue.Add(lockedObject);
+                }
+                lock (lockedObject) {
+                    Monitor.Wait(lockedObject);
+                }
+            }
         }
 
         public RealPadInt CreatePadInt(int uid) {
+            checkFreezeStatus();
             if (padIntStorage.ContainsKey(uid)) {
                 return null;
             }
@@ -143,6 +153,7 @@ namespace PADIDSTM {
 
         }
         public RealPadInt AccessPadInt(int uid) {
+            checkFreezeStatus();
             if (!(padIntStorage.ContainsKey(uid))) {
                 return null;
             }
@@ -151,9 +162,8 @@ namespace PADIDSTM {
 
         }
 
-        public void DeletePadInt(int uid)
-        {
-          padIntStorage.Remove(uid);
+        public void DeletePadInt(int uid) {
+            padIntStorage.Remove(uid);
         }
 
 
@@ -175,17 +185,26 @@ namespace PADIDSTM {
 
         public void fail() {
             setStatus(State.Failed);
-            ChannelServices.UnregisterChannel(remoteChannel);
         }
 
         public void freeze() {
             setStatus(State.Frozen);
-            ChannelServices.UnregisterChannel(remoteChannel);
+
+
         }
 
         static void recover() {
-            ChannelServices.RegisterChannel(remoteChannel, true);
+            Console.WriteLine("entered request QueueLock");
             setStatus(State.Working);
+            lock (requestQueueLock) {
+                Console.WriteLine("entered request QueueLock");
+                foreach (object obj in requestQueue) {
+                    lock (obj) {
+                        Monitor.Pulse(obj);
+                    }
+                }
+                requestQueue.Clear();
+            }
         }
 
         private class DataServerWorker {
@@ -208,24 +227,21 @@ namespace PADIDSTM {
                     // You could also user server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
                     client.Close();
-                    Console.WriteLine("Going To Recover!");
-                    if(state == State.Failed)
+                    if (state != State.Working)
                         recover();
 
                 }
             }
 
-            public void heartBeatWorker()
-            {
-              while (true)
-              {
-                  if (state == State.Failed) {
-                      Thread.Sleep(1000);
-                      continue;
-                  }
-                Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
-                masterServer.iAmAlive(id);
-              }
+            public void heartBeatWorker() {
+                while (true) {
+                    if (state == State.Failed) {
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+                    Thread.Sleep(Utils.HEARTBEAT_INTERVAL);
+                    masterServer.iAmAlive(id);
+                }
             }
         }
     }

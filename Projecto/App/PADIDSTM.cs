@@ -111,6 +111,7 @@ namespace PADIDSTM {
         public static bool Freeze(string url) {
                 DataServer dataServer = (DataServer)Activator.GetObject(typeof(DataServer), url);
                 dataServer.freeze();
+
                 return true;
         }
 
