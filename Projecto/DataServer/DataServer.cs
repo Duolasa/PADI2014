@@ -94,11 +94,9 @@ namespace PADIDSTM {
 
         public bool ServerHasDied(int serverId)
         {
-          Console.WriteLine("boas");
-
           if (otherSafeCopies.ContainsKey(serverId))   /// if this server is responsible for the save copy of the dead
           {
-            Console.WriteLine("i am server " + id + " and i have stuff from server " + serverId);
+            Console.WriteLine("i am server " + id + " and I had the safe copy of " + serverId);
             Dictionary<int, Hashtable> safeCopy;
             otherSafeCopies.TryGetValue(serverId, out safeCopy);
 
@@ -115,7 +113,7 @@ namespace PADIDSTM {
 
           if (serverId == (id + 1) % dataServersTable.getNumberOfServers()) //dead server had my backup copy
           {
-            Console.WriteLine("server " + serverId + " had my stuff. I am " + id);
+            Console.WriteLine("server " + serverId + " had my copy. I am " + id);
 
             Dictionary<int, string> dic = dataServersTable.getDictionary();
             String url;
@@ -131,6 +129,9 @@ namespace PADIDSTM {
               Hashtable clone = (Hashtable)entry.Value.Clone();
               myPadIntSafeCopy.Add(entry.Key, clone);
             }
+
+            Console.WriteLine("My safe copy is now at: " + copyHolder.getId());
+
 
             return true;
           }
@@ -162,8 +163,6 @@ namespace PADIDSTM {
 
             DataServer copyHolder = (DataServer)Activator.GetObject(typeof(DataServer), url); ;
             myPadIntSafeCopy = copyHolder.getPadIntSafeCopy(id);
-
-            Console.WriteLine("Got my safe copy from server " + copyHolder.getId());
         }
 
         public RealPadInt CreatePadIntSafeCopy(int uid) {
