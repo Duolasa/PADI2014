@@ -29,6 +29,7 @@ namespace PADIDSTM {
         static private State state = State.Working;
         static private Dictionary<int, Hashtable> myPadIntSafeCopy = new Dictionary<int, Hashtable>();
         static private Dictionary<int, Dictionary<int, Hashtable>> otherSafeCopies = new Dictionary<int, Dictionary<int, Hashtable>>();
+        static private List<Object> requestQueue = new List<Object>();
 
         static void Main(string[] args) {
             //Console.WriteLine(args);
