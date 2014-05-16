@@ -35,7 +35,7 @@ namespace PADIDSTM {
 
         static void launchMasterServer(int port) {
             TcpChannel channel = new TcpChannel(port);
-            ChannelServices.RegisterChannel(channel, true);
+            ChannelServices.RegisterChannel(channel, false);
 
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(Master),

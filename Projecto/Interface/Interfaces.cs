@@ -32,7 +32,8 @@ namespace PADIDSTM
         void WriteOnMySafeCopy(int correspondingId, int padId, int padValue);
         void DeleteOnMySafeCopy(int correspondingId, int padIntId);
 
-        void WriteCommit(int padId, int padValue);
+               void WriteCommit(int padId, int padValue);
+
 
 
 

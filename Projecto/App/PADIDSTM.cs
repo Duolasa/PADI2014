@@ -23,7 +23,7 @@ namespace PADIDSTM {
 
         public static bool Init() {
           TcpChannel channel = new TcpChannel();
-          ChannelServices.RegisterChannel(channel, true);
+          ChannelServices.RegisterChannel(channel, false);
             masterServer = (IMaster)Activator.GetObject(typeof(IMaster),"tcp://localhost:1000/MasterServer");
             RequestHash();
             return true;
@@ -62,7 +62,8 @@ namespace PADIDSTM {
                 }
                 return true;
             } catch (Exception e) {
-                throw new TxException("TxCommit", e);
+                Console.WriteLine(e.Message);
+                throw new Exception("Fodasse") ;
             }
         }
         public static bool TxAbort() {

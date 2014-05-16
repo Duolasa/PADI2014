@@ -62,7 +62,7 @@ namespace PADIDSTM {
         static void launchServer(int port) {
             remoteChannel = new TcpChannel(port);
             adminChannel = new TcpChannel(port + Utils.ADMIN_PORT);
-            ChannelServices.RegisterChannel(remoteChannel, true);
+            ChannelServices.RegisterChannel(remoteChannel, false);
 
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(DataServer),
@@ -278,6 +278,12 @@ namespace PADIDSTM {
                     Monitor.Wait(lockedObject);
                 }
             }
+        }
+
+
+
+        public  void WriteCommit() {
+            checkFreezeStatus();
         }
 
         public RealPadInt CreatePadInt(int uid) {
