@@ -90,6 +90,22 @@ namespace PADIDSTM {
             }
         }
 
+        static public void BroadCastDeathOfServer(int id)
+        {
+          int dataServerCounter = dataServers.getNumberOfServers();
+
+          Dictionary<int, string>.ValueCollection UrlColl = dataServers.getAllUrls();
+          foreach (string url in UrlColl)
+          {
+            Console.WriteLine("sending death to " + url);
+            DataServer dataServer = (DataServer)Activator.GetObject(
+                        typeof(DataServer),
+                        url);
+            if (dataServer != null)
+              dataServer.ServerHasDied(id);
+          }
+        }
+
         static void initiateDataServersCopy() {
             Console.WriteLine("Data servers getting reference to safe copy");
             int dataServerCounter = dataServers.getNumberOfServers();
@@ -129,6 +145,15 @@ namespace PADIDSTM {
                     Dictionary<int, string> deadServers = dataServers.getDeadServers();
                     if (deadServers.Count > 0) {
                         foreach (KeyValuePair<int, string> pair in deadServers) {
+                          if (!dataServers.getAlreadyDiedBefore().ContainsKey(pair.Key))
+                          {
+                            Console.WriteLine("Server " + pair.Key + " died for the first time");
+
+                            dataServers.getAlreadyDiedBefore().Add(pair.Key, true);
+                            dataServers.getDictionary()[pair.Key] = dataServers.getDictionary()[(pair.Key + 1) % dataServers.getNumberOfServers()];
+                            sendTableToDataServers();
+                            BroadCastDeathOfServer(pair.Key);
+                          }
                             Console.WriteLine("OMFG MAN(SERVER) " + pair.Key + " IS DOWN");
 
                         }
