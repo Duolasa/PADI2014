@@ -15,6 +15,7 @@ namespace PADIDSTM
         public const int ADMIN_PORT = 1337;
         public const int HEARTBEAT_INTERVAL = 2500;
         public const int HEARTBEAT_INTERVAL_CHECK = 5000;
+        public const int WAITING_FOR_TX_TIMEOUT = 5;
 
         public static string getDataServerUrl(int port) 
         {

@@ -37,10 +37,17 @@ namespace PADIDSTM
               if (txID == this.writeTXID || (readingTXID.Count == 1 && readingTXID.Contains(txID))) {
                   newValue = val;
                   this.writeTXID = txID;
-                  readingTXID.Add(txID);
+                //  readingTXID.Add(txID);
+                  beingWrited = true;
               } else {
-                  while (beingWrited && readingTXID.Count > 0)
-                      Monitor.Wait(this);
+                  while (beingWrited && readingTXID.Count > 0) {
+                      bool timeout = false;
+                      TimeSpan timeoutTime = new TimeSpan(0, 0, Utils.WAITING_FOR_TX_TIMEOUT);
+                      Monitor.Wait(this, timeoutTime, timeout);
+                      if (!timeout) {
+                          throw new Exception("Timed out waiting for TX while trying to write");
+                      }
+                  }
                   beingWrited = true;
                   this.writeTXID = txID;
                   newValue = val;
@@ -68,8 +75,14 @@ namespace PADIDSTM
                     readingTXID.Add(txID);
                     return newValue;
                 }
-                while (beingWrited)
-                    Monitor.Wait(this);
+                while (beingWrited) {
+                    bool timeout = false;
+                    TimeSpan timeoutTime = new TimeSpan(0, 0,Utils.WAITING_FOR_TX_TIMEOUT);
+                    Monitor.Wait(this, timeoutTime, timeout);
+                    if (!timeout) {
+                        throw new Exception("Timed out waiting for TX while trying read");
+                    }
+                }
                 readingTXID.Add(txID);
                 return value;
             }

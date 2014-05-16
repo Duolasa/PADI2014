@@ -19,15 +19,18 @@ namespace PADIDSTM {
                 PadiDstm.Init();
                 res = PadiDstm.TxBegin();
                 PadInt pi_a = PadiDstm.CreatePadInt(0);
+                Console.WriteLine("Created Paint 0");
                 pi_a.Write(36);
-                PadInt pi_b = PadiDstm.CreatePadInt(1);
-                pi_b.Write(37);
-                res = PadiDstm.TxCommit();
+                Console.WriteLine("Wrote Padint 0");
+                Console.ReadLine();
+                PadiDstm.TxAbort();
+                Console.WriteLine("Aborted");
+                //res = PadiDstm.TxCommit();
+                Console.ReadLine();
                 res = PadiDstm.TxBegin();
-
                 PadiDstm.Status();
                 Console.WriteLine("Testing recover server 1");
-                res = PadiDstm.Fail("tcp://localhost:1001/Server");
+               // res = PadiDstm.Fail("tcp://localhost:1001/Server");
                 PadiDstm.Status();
                 Console.ReadLine();
                 pi_a = PadiDstm.AccessPadInt(0);

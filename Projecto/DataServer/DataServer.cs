@@ -283,19 +283,24 @@ namespace PADIDSTM {
         }
         public RealPadInt AccessPadInt(int uid) {
             checkFreezeStatus();
+            Console.WriteLine("Not freeze");
             int correspondingServer = (uid) % dataServersTable.getNumberOfServers();
-
+            Console.WriteLine("correspondingServer = " + correspondingServer);
+            Console.WriteLine("padIntStorage size = " + padIntStorage.Count);
             if (!padIntStorage.ContainsKey(correspondingServer)) {
+                Console.WriteLine("padIntStorage don´t contain server " + correspondingServer);
                 return null;
             }
 
             Hashtable safeCopy;
             padIntStorage.TryGetValue(correspondingServer, out safeCopy);
-
+            Console.WriteLine(safeCopy == null);
             if (!safeCopy.ContainsKey(uid)) {
+                Console.WriteLine("safeCopy has " + safeCopy.Count + " keys");
+                Console.WriteLine("safeCopy don't contain key " + uid);
                 return null;
             }
-
+            Console.WriteLine(safeCopy[uid]);
             return (RealPadInt)safeCopy[uid];
 
         }

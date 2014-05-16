@@ -7,10 +7,15 @@ using System.Threading.Tasks;
 namespace PADIDSTM {
     public class PadIntHolder : PadInt {
 
+        private bool created = false;
         private bool waitingForWrite = false;
         private int txID;
         private RealPadInt realPadInt;
 
+        public bool Created {
+            get { return created; }
+            set { created = value; }
+        }
         public RealPadInt RealPadInt {
             get { return realPadInt; }
         }
